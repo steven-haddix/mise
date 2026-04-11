@@ -1,0 +1,21 @@
+{
+  "private": true,
+  "name": "mise",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "bun-types": "latest",
+    "oxfmt": "latest",
+    "typescript": "latest"
+  },
+  "scripts": {
+    "dev": "bun --env-file=.env run --filter './packages/api' dev & bun --env-file=.env run --filter './packages/worker' dev",
+    "build": "bun run --filter '*' build",
+    "fmt": "oxfmt .",
+    "fmt:check": "oxfmt --check .",
+    "db:push": "cd packages/api && bun --env-file=../../.env drizzle-kit push",
+    "db:generate": "cd packages/api && bun --env-file=../../.env drizzle-kit generate"
+  }
+}

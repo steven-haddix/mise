@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.worktrees/
+packages/api/drizzle/
+packages/mobile/.expo/
+packages/mobile/node_modules/

@@ -1,0 +1,33 @@
+@import "tailwindcss";
+@import "uniwind";
+@import "heroui-native/styles";
+
+@source "./app";
+@source "./components";
+@source "./node_modules/heroui-native/lib";
+
+@theme {
+  --color-background: hsl(0, 0%, 4%);
+  --color-foreground: hsl(0, 0%, 98.5%);
+  --color-card: hsl(0, 0%, 13%);
+  --color-card-foreground: hsl(0, 0%, 98.5%);
+  --color-popover: hsl(0, 0%, 13%);
+  --color-popover-foreground: hsl(0, 0%, 98.5%);
+  --color-primary: hsl(270, 60%, 70%);
+  --color-primary-foreground: hsl(0, 0%, 100%);
+  --color-secondary: hsl(0, 0%, 22%);
+  --color-secondary-foreground: hsl(0, 0%, 98.5%);
+  --color-muted: hsl(0, 0%, 22%);
+  --color-muted-foreground: hsl(0, 0%, 56%);
+  --color-accent: hsl(270, 60%, 70%);
+  --color-accent-foreground: hsl(0, 0%, 100%);
+  --color-success: hsl(142, 70%, 45%);
+  --color-success-foreground: hsl(142, 70%, 98.5%);
+  --color-warning: hsl(48, 96%, 53%);
+  --color-warning-foreground: hsl(0, 0%, 4%);
+  --color-danger: hsl(0, 84%, 60%);
+  --color-danger-foreground: hsl(0, 0%, 98.5%);
+  --color-border: hsl(0, 0%, 18%);
+  --color-input: hsl(0, 0%, 18%);
+  --color-ring: hsl(270, 60%, 70%);
+}
