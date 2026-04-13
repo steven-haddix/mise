@@ -81,3 +81,48 @@ export function registerPushToken(token: string, deviceId: string) {
     body: JSON.stringify({ token, deviceId }),
   });
 }
+
+// Conversations (new)
+export function createConversation() {
+  return fetchApi<{ conversationId: string; messages: import("@mise/shared").Message[] }>(
+    "/api/v1/conversations",
+    { method: "POST" },
+  );
+}
+
+export function patchMessage(
+  conversationId: string,
+  messageId: string,
+  body: { proposalState: "confirmed" | "superseded"; createdCookId?: string },
+) {
+  return fetchApi<{ ok: true }>(
+    `/api/v1/conversations/${conversationId}/messages/${messageId}`,
+    { method: "PATCH", body: JSON.stringify(body) },
+  );
+}
+
+// Cook creation from a confirmed plan
+export async function createCook(
+  proposalId: string,
+  body: {
+    conversationId: string;
+    title: string;
+    targetTime: string;
+    steps: Array<{ title: string; description: string; scheduledAt: string }>;
+  },
+): Promise<import("@mise/shared").CookWithSteps> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/cooks`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Proposal-Id": proposalId,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: "Request failed" }));
+    throw Object.assign(new Error(err.error || `HTTP ${res.status}`), { status: res.status, notes: err.notes });
+  }
+  return res.json();
+}
