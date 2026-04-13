@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -10,17 +10,35 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Send, Plus } from "lucide-react-native";
+import { useLocalSearchParams, useFocusEffect, router } from "expo-router";
 import { useStore } from "../../../lib/store";
-import { sendMessage, getConversation, listConversations } from "../../../lib/api";
+import {
+  sendMessage,
+  getConversation,
+  createConversation,
+  createCook,
+  patchMessage,
+  listConversations,
+} from "../../../lib/api";
 import { ChatBubble } from "../../../components/ChatBubble";
-import { NewCookSheet } from "../../../components/NewCookSheet";
+import { PlanPreviewCard, type PlanPreviewData } from "../../../components/PlanPreviewCard";
+import { EnableNotificationsModal } from "../../../components/EnableNotificationsModal";
+import { getPermissionState, requestPermissionAndRegister, type PermissionState } from "../../../lib/push-permissions";
 import type { Message } from "@mise/shared";
 
 export default function ChatScreen() {
+  const { new: newParam, conversationId: conversationIdParam } = useLocalSearchParams<{
+    new?: string;
+    conversationId?: string;
+  }>();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [showNewCook, setShowNewCook] = useState(false);
+  const [permission, setPermission] = useState<PermissionState>("undetermined");
+  const [showEnableNotifs, setShowEnableNotifs] = useState(false);
+  const [buildErrors, setBuildErrors] = useState<Record<string, string>>({});
+  const [hasPromptedNotifs, setHasPromptedNotifs] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+  const inputRef = useRef<TextInput>(null);
   const {
     activeConversationId,
     setActiveConversationId,
@@ -29,9 +47,56 @@ export default function ChatScreen() {
     streamingText,
     setStreamingText,
     appendStreamingText,
+    mergeCook,
   } = useStore();
 
-  // Load conversation messages when active conversation changes
+  // Load push permission state on mount.
+  useEffect(() => {
+    getPermissionState().then(setPermission);
+  }, []);
+
+  // Deep link: /chat/[conversationId] → set this as the active conversation.
+  useEffect(() => {
+    if (conversationIdParam && conversationIdParam !== activeConversationId) {
+      setActiveConversationId(conversationIdParam);
+    }
+  }, [conversationIdParam, activeConversationId, setActiveConversationId]);
+
+  // Handle `?new=1` — create a fresh conversation and focus input.
+  useEffect(() => {
+    if (newParam !== "1") return;
+    (async () => {
+      try {
+        const { conversationId, messages: initial } = await createConversation();
+        setActiveConversationId(conversationId);
+        setMessages(initial as Message[]);
+        // Strip the `new=1` param so a re-render doesn't loop.
+        router.setParams({ new: undefined as any });
+        setTimeout(() => inputRef.current?.focus(), 150);
+      } catch (err) {
+        console.error("[Chat] createConversation error:", err);
+      }
+    })();
+  }, [newParam, setActiveConversationId]);
+
+  // On focus, if there's no active conversation (and no deep-link param), load the most recent.
+  useFocusEffect(
+    useCallback(() => {
+      if (newParam === "1") return;
+      if (conversationIdParam) return;
+      if (activeConversationId) return;
+      (async () => {
+        try {
+          const convos = await listConversations();
+          if (convos.length > 0) setActiveConversationId(convos[0].id);
+        } catch (err) {
+          console.error("[Chat] listConversations error:", err);
+        }
+      })();
+    }, [activeConversationId, conversationIdParam, newParam, setActiveConversationId]),
+  );
+
+  // Load messages when activeConversationId changes.
   useEffect(() => {
     if (!activeConversationId) return;
     getConversation(activeConversationId).then((convo) => {
@@ -39,74 +104,161 @@ export default function ChatScreen() {
     });
   }, [activeConversationId]);
 
-  const handleSend = useCallback(
-    async (text?: string, targetTime?: string) => {
-      const messageText = text || input.trim();
-      if (!messageText || isStreaming) return;
+  const handleSend = useCallback(async () => {
+    const text = input.trim();
+    if (!text || isStreaming) return;
 
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        conversationId: activeConversationId || "",
-        role: "user",
-        content: messageText,
-        toolCalls: null,
-        createdAt: new Date().toISOString(),
-      };
+    // Make sure we have a conversation.
+    let convoId = activeConversationId;
+    if (!convoId) {
+      const created = await createConversation();
+      convoId = created.conversationId;
+      setActiveConversationId(convoId);
+      setMessages(created.messages as Message[]);
+    }
 
-      setMessages((prev) => [...prev, userMessage]);
-      setInput("");
-      setIsStreaming(true);
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      conversationId: convoId,
+      role: "user",
+      content: text,
+      toolCalls: null,
+      createdAt: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsStreaming(true);
+    setStreamingText("");
+
+    try {
+      const { stream } = await sendMessage({ message: text, conversationId: convoId });
+      const reader = stream.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        fullText += chunk;
+        appendStreamingText(chunk);
+      }
+
+      // Refetch conversation to pick up the assistant message (including toolCalls) persisted server-side.
+      const convo = await getConversation(convoId);
+      setMessages(convo.messages);
+    } catch (err) {
+      console.error("[Chat] send error:", err);
+    } finally {
+      setIsStreaming(false);
       setStreamingText("");
+    }
+  }, [input, activeConversationId, isStreaming]);
 
+  const handleNewChat = useCallback(async () => {
+    try {
+      const { conversationId, messages: initial } = await createConversation();
+      setActiveConversationId(conversationId);
+      setMessages(initial as Message[]);
+      setTimeout(() => inputRef.current?.focus(), 150);
+    } catch (err) {
+      console.error("[Chat] new-chat error:", err);
+    }
+  }, [setActiveConversationId]);
+
+  // Derive the latest active propose_plan proposalId in this conversation (others are superseded/confirmed).
+  const latestActiveProposalId = useMemo(() => {
+    let latest: string | null = null;
+    for (const m of messages) {
+      const tc = Array.isArray(m.toolCalls) ? (m.toolCalls as any[]) : [];
+      for (const entry of tc) {
+        if (entry?.toolName === "propose_plan" && entry?.output?.state === "active") {
+          latest = entry.output.proposalId;
+        }
+      }
+    }
+    return latest;
+  }, [messages]);
+
+  const handleBuild = useCallback(
+    async (message: Message, plan: PlanPreviewData) => {
       try {
-        const { conversationId, stream } = await sendMessage({
-          message: messageText,
-          conversationId: activeConversationId || undefined,
-          targetTime,
+        const cook = await createCook(plan.proposalId, {
+          conversationId: message.conversationId,
+          title: plan.title,
+          targetTime: plan.targetTime,
+          steps: plan.steps.map(({ title, description, scheduledAt }) => ({
+            title,
+            description,
+            scheduledAt,
+          })),
         });
+        mergeCook(cook);
+        await patchMessage(message.conversationId, message.id, {
+          proposalState: "confirmed",
+          createdCookId: cook.id,
+        });
+        // Patch the local message so the card re-renders as confirmed.
+        setMessages((prev) =>
+          prev.map((m) => {
+            if (m.id !== message.id) return m;
+            const tc = Array.isArray(m.toolCalls) ? (m.toolCalls as any[]) : [];
+            return {
+              ...m,
+              toolCalls: tc.map((entry) =>
+                entry?.toolName === "propose_plan" && entry.output?.proposalId === plan.proposalId
+                  ? { ...entry, output: { ...entry.output, state: "confirmed", createdCookId: cook.id } }
+                  : entry,
+              ),
+            };
+          }),
+        );
+        setBuildErrors((e) => ({ ...e, [plan.proposalId]: "" }));
 
-        if (!activeConversationId) {
-          setActiveConversationId(conversationId);
+        // First successful Build it → prompt for notifications if undetermined.
+        if (!hasPromptedNotifs) {
+          setHasPromptedNotifs(true);
+          if (permission === "undetermined") setShowEnableNotifs(true);
         }
-
-        const reader = stream.getReader();
-        const decoder = new TextDecoder();
-        let fullText = "";
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          fullText += chunk;
-          appendStreamingText(chunk);
-        }
-
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          conversationId,
-          role: "assistant",
-          content: fullText,
-          toolCalls: null,
-          createdAt: new Date().toISOString(),
-        };
-
-        setMessages((prev) => [...prev, assistantMessage]);
-      } catch (error) {
-        console.error("[Chat] send error:", error);
-      } finally {
-        setIsStreaming(false);
-        setStreamingText("");
+      } catch (err: any) {
+        const msg =
+          err?.status === 422
+            ? "This plan is out of date — ask Mise to redo it."
+            : err?.message ?? "Failed to build — try again.";
+        setBuildErrors((e) => ({ ...e, [plan.proposalId]: msg }));
       }
     },
-    [input, activeConversationId, isStreaming],
+    [mergeCook, hasPromptedNotifs, permission],
   );
 
-  const handleNewCook = (description: string, targetTime: string) => {
-    setShowNewCook(false);
-    setActiveConversationId(null);
-    setMessages([]);
-    handleSend(description, targetTime);
-  };
+  const handleEnableNotifs = useCallback(async () => {
+    setShowEnableNotifs(false);
+    const newState = await requestPermissionAndRegister();
+    setPermission(newState);
+  }, []);
+
+  // Render a single message (optionally accompanied by a PlanPreviewCard).
+  const renderItem = useCallback(
+    ({ item }: { item: Message }) => {
+      const toolCalls = Array.isArray(item.toolCalls) ? (item.toolCalls as any[]) : [];
+      const planCall = toolCalls.find((t) => t?.toolName === "propose_plan");
+      return (
+        <View>
+          {item.content ? <ChatBubble message={item} /> : null}
+          {planCall && planCall.output ? (
+            <PlanPreviewCard
+              data={planCall.output as PlanPreviewData}
+              pushPermission={permission}
+              onBuild={() => handleBuild(item, planCall.output as PlanPreviewData)}
+              onViewCook={(cookId) => router.push(`/(tabs)/(cooks)/${cookId}` as any)}
+              buildError={buildErrors[planCall.output.proposalId] || null}
+            />
+          ) : null}
+        </View>
+      );
+    },
+    [permission, buildErrors, handleBuild],
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#0a0a0a" }} edges={["top"]}>
@@ -125,68 +277,45 @@ export default function ChatScreen() {
             paddingVertical: 12,
           }}
         >
-          <Text style={{ fontSize: 24, fontWeight: "bold", color: "#c9a0dc" }}>Mise</Text>
+          <View style={{ width: 40 }} />
+          <Text style={{ fontSize: 22, fontWeight: "700", color: "#c9a0dc" }}>Mise</Text>
           <Pressable
-            onPress={() => setShowNewCook(true)}
+            onPress={handleNewChat}
+            hitSlop={8}
             style={{
-              backgroundColor: "#2a1a3a",
-              paddingHorizontal: 14,
-              paddingVertical: 8,
-              borderRadius: 20,
-              flexDirection: "row",
+              width: 40,
+              height: 40,
               alignItems: "center",
-              gap: 6,
+              justifyContent: "center",
             }}
           >
-            <Plus size={16} color="#c9a0dc" />
-            <Text style={{ color: "#c9a0dc", fontWeight: "600" }}>New Cook</Text>
+            <Plus size={22} color="#c9a0dc" />
           </Pressable>
         </View>
 
         {/* Messages */}
-        {messages.length === 0 && !isStreaming ? (
-          <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 32 }}>
-            <Text style={{ fontSize: 40, marginBottom: 16 }}>🧪</Text>
-            <Text
-              style={{
-                fontSize: 18,
-                color: "#c9a0dc",
-                fontWeight: "600",
-                textAlign: "center",
-                marginBottom: 8,
-              }}
-            >
-              Chef Catalyst at your service!
-            </Text>
-            <Text style={{ fontSize: 14, color: "#666", textAlign: "center", lineHeight: 20 }}>
-              Tell me what you want to cook and when you want to eat it, or tap "New Cook" to get
-              started with the date picker.
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <ChatBubble message={item} />}
-            contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
-            onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-            ListFooterComponent={
-              isStreaming && streamingText ? (
-                <ChatBubble
-                  message={{
-                    id: "streaming",
-                    conversationId: "",
-                    role: "assistant",
-                    content: streamingText,
-                    toolCalls: null,
-                    createdAt: new Date().toISOString(),
-                  }}
-                />
-              ) : null
-            }
-          />
-        )}
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+          ListFooterComponent={
+            isStreaming && streamingText ? (
+              <ChatBubble
+                message={{
+                  id: "streaming",
+                  conversationId: "",
+                  role: "assistant",
+                  content: streamingText,
+                  toolCalls: null,
+                  createdAt: new Date().toISOString(),
+                }}
+              />
+            ) : null
+          }
+        />
 
         {/* Input */}
         <View
@@ -200,9 +329,10 @@ export default function ChatScreen() {
           }}
         >
           <TextInput
+            ref={inputRef}
             value={input}
             onChangeText={setInput}
-            placeholder="Message your kitchen chemist..."
+            placeholder="What are you cooking?"
             placeholderTextColor="#555"
             multiline
             style={{
@@ -217,10 +347,10 @@ export default function ChatScreen() {
               fontSize: 15,
               maxHeight: 100,
             }}
-            onSubmitEditing={() => handleSend()}
+            onSubmitEditing={handleSend}
           />
           <Pressable
-            onPress={() => handleSend()}
+            onPress={handleSend}
             disabled={!input.trim() || isStreaming}
             style={{
               width: 40,
@@ -236,7 +366,11 @@ export default function ChatScreen() {
         </View>
       </KeyboardAvoidingView>
 
-      <NewCookSheet visible={showNewCook} onDismiss={() => setShowNewCook(false)} onSubmit={handleNewCook} />
+      <EnableNotificationsModal
+        visible={showEnableNotifs}
+        onEnable={handleEnableNotifs}
+        onDismiss={() => setShowEnableNotifs(false)}
+      />
     </SafeAreaView>
   );
 }
