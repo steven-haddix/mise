@@ -29,6 +29,7 @@ export default function TabsLayout() {
   return (
     <View style={{ flex: 1 }}>
       <Tabs
+        initialRouteName="(cooks)"
         screenOptions={{
           headerShown: false,
           tabBarStyle: {
@@ -43,17 +44,17 @@ export default function TabsLayout() {
         }}
       >
         <Tabs.Screen
+          name="(cooks)"
+          options={{
+            title: "Home",
+            tabBarIcon: ({ color, size }) => <ChefHat size={size} color={color} />,
+          }}
+        />
+        <Tabs.Screen
           name="(chat)"
           options={{
             title: "Chat",
             tabBarIcon: ({ color, size }) => <MessageCircle size={size} color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="(cooks)"
-          options={{
-            title: "Cooks",
-            tabBarIcon: ({ color, size }) => <ChefHat size={size} color={color} />,
           }}
         />
         <Tabs.Screen
