@@ -25,7 +25,7 @@ app.onError((err, c) => {
 // Start the notification poller
 startNotificationPoller();
 
-const port = Number(process.env.PORT ?? 8082);
+const port = Number(process.env.PORT ?? 8092);
 console.log(`mise-worker listening on :${port}`);
 
 export default { port, fetch: app.fetch };

@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:17
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       POSTGRES_USER: mise
       POSTGRES_PASSWORD: mise
@@ -20,7 +20,7 @@ services:
       context: .
       dockerfile: packages/api/Dockerfile
     ports:
-      - "8080:8080"
+      - "8090:8090"
     depends_on:
       db:
         condition: service_healthy

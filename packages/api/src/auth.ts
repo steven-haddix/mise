@@ -6,7 +6,7 @@ import { db } from "./db/client.js";
 import * as schema from "./db/schema.js";
 
 const trustedOrigins = [
-  "http://localhost:8080",
+  "http://localhost:8090",
   ...(process.env.TRUSTED_ORIGINS?.split(",")
     .map((origin) => origin.trim())
     .filter(Boolean) ?? []),
@@ -14,7 +14,7 @@ const trustedOrigins = [
 
 export const auth = betterAuth({
   appName: "Mise",
-  baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:8080",
+  baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:8090",
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
@@ -38,7 +38,7 @@ export const auth = betterAuth({
     skipStateCookieCheck: process.env.NODE_ENV !== "production",
   },
   trustedOrigins: [
-    ...new Set([...trustedOrigins, "mise://", "mise-local://", "exp://**"]),
+    ...new Set([...trustedOrigins, "mise://", "mise-local://", "mise-dev://", "exp://**"]),
   ],
   advanced: {
     useSecureCookies: process.env.NODE_ENV === "production",

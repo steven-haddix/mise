@@ -11,10 +11,10 @@ function getApiBaseUrl(): string {
 
   const metroHost = Constants.expoConfig?.hostUri?.split(":")[0];
   if (metroHost) {
-    return `http://${metroHost}:8080`;
+    return `http://${metroHost}:8090`;
   }
 
-  return "http://localhost:8080";
+  return "http://localhost:8090";
 }
 
 export const API_BASE_URL = getApiBaseUrl();

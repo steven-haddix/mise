@@ -4,7 +4,7 @@ import { authClient } from "../../lib/auth";
 
 export default function LoginScreen() {
   const handleGoogleLogin = async () => {
-    await authClient.signIn.social({ provider: "google" });
+    await authClient.signIn.social({ provider: "google", callbackURL: "/" });
   };
 
   return (
