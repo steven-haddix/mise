@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, integer, jsonb, pgEnum, index } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, integer, jsonb, pgEnum, index, uniqueIndex } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // ── Enums ──────────────────────────────────────────────────────────────────
@@ -127,12 +127,14 @@ export const cooks = pgTable(
     targetTime: timestamp("target_time", { withTimezone: true }).notNull(),
     status: cookStatusEnum("status").notNull().default("planning"),
     notes: text("notes"),
+    proposalId: uuid("proposal_id"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
     userIdx: index("idx_cooks_user").on(t.userId),
     statusIdx: index("idx_cooks_status").on(t.status),
+    proposalIdx: uniqueIndex("idx_cooks_proposal").on(t.proposalId),
   }),
 );
 
