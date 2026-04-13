@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -165,20 +165,6 @@ export default function ChatScreen() {
       console.error("[Chat] new-chat error:", err);
     }
   }, [setActiveConversationId]);
-
-  // Derive the latest active propose_plan proposalId in this conversation (others are superseded/confirmed).
-  const latestActiveProposalId = useMemo(() => {
-    let latest: string | null = null;
-    for (const m of messages) {
-      const tc = Array.isArray(m.toolCalls) ? (m.toolCalls as any[]) : [];
-      for (const entry of tc) {
-        if (entry?.toolName === "propose_plan" && entry?.output?.state === "active") {
-          latest = entry.output.proposalId;
-        }
-      }
-    }
-    return latest;
-  }, [messages]);
 
   const handleBuild = useCallback(
     async (message: Message, plan: PlanPreviewData) => {

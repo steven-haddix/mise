@@ -12,6 +12,7 @@ export interface Cook {
   targetTime: string;
   status: CookStatus;
   notes: string | null;
+  proposalId: string | null;
   createdAt: string;
   updatedAt: string;
 }
