@@ -67,14 +67,58 @@ chatRoutes.post("/chat", async (c) => {
     messages: aiMessages,
     tools,
     maxSteps: 3,
-    onFinish: async ({ text, toolCalls }) => {
+    onFinish: async ({ text, toolCalls, toolResults }) => {
+      // Shape the tool-call array we persist. For propose_plan, flatten the output onto the entry.
+      // AI SDK v6 uses `input` on TypedToolCall and exposes tool outputs via a separate
+      // `toolResults` array keyed by toolCallId.
+      const resultsById = new Map<string, any>();
+      for (const r of (toolResults ?? []) as any[]) {
+        resultsById.set(r.toolCallId, r.output ?? null);
+      }
+      const persistedToolCalls = toolCalls?.length
+        ? toolCalls.map((t: any) => ({
+            toolName: t.toolName,
+            toolCallId: t.toolCallId,
+            args: t.input ?? t.args ?? null,
+            output: resultsById.get(t.toolCallId) ?? t.output ?? t.result ?? null,
+          }))
+        : null;
+
       // Save assistant message
-      await db.insert(messages).values({
-        conversationId: conversationId!,
-        role: "assistant",
-        content: text,
-        toolCalls: toolCalls?.length ? toolCalls : null,
-      });
+      const [saved] = await db
+        .insert(messages)
+        .values({
+          conversationId: conversationId!,
+          role: "assistant",
+          content: text,
+          toolCalls: persistedToolCalls,
+        })
+        .returning();
+
+      // If this message contains a new active propose_plan, supersede all earlier active ones.
+      const hasNewActiveProposal = persistedToolCalls?.some(
+        (t) => t.toolName === "propose_plan" && t.output?.state === "active",
+      );
+      if (hasNewActiveProposal) {
+        const earlier = await db.query.messages.findMany({
+          where: eq(messages.conversationId, conversationId!),
+        });
+        for (const m of earlier) {
+          if (m.id === saved.id) continue;
+          const tc = Array.isArray(m.toolCalls) ? (m.toolCalls as any[]) : [];
+          let changed = false;
+          const next = tc.map((entry) => {
+            if (entry?.toolName === "propose_plan" && entry?.output?.state === "active") {
+              changed = true;
+              return { ...entry, output: { ...entry.output, state: "superseded" } };
+            }
+            return entry;
+          });
+          if (changed) {
+            await db.update(messages).set({ toolCalls: next }).where(eq(messages.id, m.id));
+          }
+        }
+      }
 
       // Update conversation timestamp
       await db
