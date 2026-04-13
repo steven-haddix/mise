@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { View, Text, ScrollView, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
-import { ArrowLeft, MessageCircle, Check } from "lucide-react-native";
-import { getCook, updateStep } from "../../../lib/api";
+import { ArrowLeft, MessageCircle } from "lucide-react-native";
+import { getCook, updateStep, updateCook } from "../../../lib/api";
 import { TimelineStep } from "../../../components/TimelineStep";
 import type { CookWithSteps } from "@mise/shared";
 
@@ -11,11 +11,19 @@ export default function CookTimelineScreen() {
   const { cookId } = useLocalSearchParams<{ cookId: string }>();
   const [cook, setCook] = useState<CookWithSteps | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     if (!cookId) return;
     getCook(cookId)
-      .then(setCook)
+      .then((c) => setCook(c))
+      .catch((err) => {
+        if (/HTTP 404/i.test(err?.message ?? "")) {
+          setNotFound(true);
+        } else {
+          console.error("[CookDetail] fetch error:", err);
+        }
+      })
       .finally(() => setLoading(false));
   }, [cookId]);
 
@@ -34,11 +42,33 @@ export default function CookTimelineScreen() {
     );
   }
 
-  if (!cook) {
+  if (notFound || !cook) {
     return (
-      <View style={{ flex: 1, backgroundColor: "#0a0a0a", alignItems: "center", justifyContent: "center" }}>
-        <Text style={{ color: "#666" }}>Cook not found</Text>
-      </View>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#0a0a0a" }}>
+        <View style={{ padding: 16 }}>
+          <Pressable onPress={() => router.back()} hitSlop={8}>
+            <ArrowLeft size={24} color="#888" />
+          </Pressable>
+        </View>
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <Text style={{ fontSize: 40, marginBottom: 12 }}>🍳</Text>
+          <Text style={{ color: "#aaa", fontSize: 16, textAlign: "center" }}>
+            This cook was removed.
+          </Text>
+          <Pressable
+            onPress={() => router.back()}
+            style={{
+              marginTop: 16,
+              backgroundColor: "#2a1a3a",
+              paddingHorizontal: 18,
+              paddingVertical: 10,
+              borderRadius: 20,
+            }}
+          >
+            <Text style={{ color: "#c9a0dc", fontWeight: "600" }}>Back</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
     );
   }
 
@@ -66,7 +96,7 @@ export default function CookTimelineScreen() {
         <Pressable
           onPress={() => {
             if (cook.conversationId) {
-              router.push("/(tabs)/(chat)");
+              router.push(`/(tabs)/(chat)/${cook.conversationId}` as any);
             }
           }}
           hitSlop={8}
@@ -113,6 +143,41 @@ export default function CookTimelineScreen() {
             onMarkComplete={() => handleMarkComplete(step.id)}
           />
         ))}
+        {cook.status !== "cancelled" && cook.status !== "completed" && (
+          <Pressable
+            onPress={() => {
+              Alert.alert(
+                "Cancel cook?",
+                "This will stop reminders and remove it from Home. You can't undo this.",
+                [
+                  { text: "Keep cooking", style: "cancel" },
+                  {
+                    text: "Cancel cook",
+                    style: "destructive",
+                    onPress: async () => {
+                      try {
+                        await updateCook(cook.id, { status: "cancelled" });
+                        router.back();
+                      } catch (err) {
+                        console.error("[CookDetail] cancel error:", err);
+                      }
+                    },
+                  },
+                ],
+              );
+            }}
+            style={{
+              marginTop: 24,
+              paddingVertical: 12,
+              borderRadius: 10,
+              borderWidth: 1,
+              borderColor: "#5a1a1a",
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ color: "#f87171", fontWeight: "600" }}>Cancel cook</Text>
+          </Pressable>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
