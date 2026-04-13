@@ -6,6 +6,7 @@ import { db } from "../db/client.js";
 import { conversations, messages } from "../db/schema.js";
 import { eq, asc } from "drizzle-orm";
 import { model, SYSTEM_PROMPT, createAITools } from "../lib/ai.js";
+import { buildActiveCooksContext } from "../lib/active-cooks-context.js";
 
 const chatRoutes = new Hono();
 
@@ -50,15 +51,15 @@ chatRoutes.post("/chat", async (c) => {
     content: m.content,
   }));
 
-  // Add target time context to system prompt if provided
-  let systemPrompt = SYSTEM_PROMPT;
+  const activeCooksBlock = await buildActiveCooksContext(user.id);
+  let systemPrompt = SYSTEM_PROMPT + activeCooksBlock;
   if (body.targetTime) {
     systemPrompt += `\n\nThe user wants to eat/serve by: ${body.targetTime}. Use this as the target time for backward-calculating the schedule. The current time is: ${new Date().toISOString()}.`;
   } else {
     systemPrompt += `\n\nThe current time is: ${new Date().toISOString()}.`;
   }
 
-  const tools = createAITools(user.id, conversationId);
+  const tools = createAITools();
 
   const result = streamText({
     model,
