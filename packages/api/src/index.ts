@@ -6,6 +6,7 @@ import { dbClient } from "./db/client.js";
 import chatRoutes from "./routes/chat.js";
 import cookRoutes from "./routes/cooks.js";
 import pushRoutes from "./routes/push.js";
+import conversationsRoutes from "./routes/conversations.js";
 
 const app = new Hono();
 
@@ -47,6 +48,7 @@ app.get("/health", async (c) => {
 // API routes
 app.route("/api/v1", chatRoutes);
 app.route("/api/v1", cookRoutes);
+app.route("/api/v1", conversationsRoutes);
 app.route("/api/v1", pushRoutes);
 
 // 404 fallback
@@ -58,7 +60,7 @@ app.onError((err, c) => {
   return c.json({ error: "Internal server error" }, 500);
 });
 
-const port = Number(process.env.PORT ?? 8080);
+const port = Number(process.env.PORT ?? 8090);
 console.log(`mise-api listening on :${port}`);
 
 export default { port, fetch: app.fetch };
