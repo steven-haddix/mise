@@ -5,9 +5,11 @@ import { useFocusEffect, router } from "expo-router";
 import { useStore } from "../../../lib/store";
 import { listCooks } from "../../../lib/api";
 import { CookCard } from "../../../components/CookCard";
+import { StartNewCookCard } from "../../../components/StartNewCookCard";
+import { getGreeting } from "../../../lib/time-format";
 
 export default function CooksScreen() {
-  const { activeCooks, completedCooks, setCooks } = useStore();
+  const { activeCooks, setCooks } = useStore();
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchCooks = useCallback(async () => {
@@ -17,7 +19,7 @@ export default function CooksScreen() {
     } catch (error) {
       console.error("[Cooks] fetch error:", error);
     }
-  }, []);
+  }, [setCooks]);
 
   useFocusEffect(
     useCallback(() => {
@@ -31,45 +33,37 @@ export default function CooksScreen() {
     setRefreshing(false);
   };
 
+  const count = activeCooks.length;
+  const subtitle =
+    count === 0
+      ? "No cooks in progress."
+      : count === 1
+        ? "1 active cook today."
+        : `${count} active cooks today.`;
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#0a0a0a" }} edges={["top"]}>
-      <View style={{ paddingHorizontal: 16, paddingVertical: 12 }}>
-        <Text style={{ fontSize: 24, fontWeight: "bold", color: "#c9a0dc" }}>My Cooks</Text>
+      <View style={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 }}>
+        <Text style={{ fontSize: 28, fontWeight: "700", color: "#fff" }}>{getGreeting()}</Text>
+        <Text style={{ fontSize: 14, color: "#888", marginTop: 4 }}>{subtitle}</Text>
       </View>
 
       <FlatList
-        data={[...activeCooks, ...completedCooks]}
+        data={activeCooks}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <Pressable onPress={() => router.push(`/(tabs)/(cooks)/${item.id}` as any)}>
             <CookCard cook={item} />
           </Pressable>
         )}
-        contentContainerStyle={{ padding: 16, paddingBottom: 100, gap: 12 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#c9a0dc" />}
-        ListEmptyComponent={
-          <View style={{ alignItems: "center", paddingTop: 80 }}>
-            <Text style={{ fontSize: 40, marginBottom: 12 }}>🍳</Text>
-            <Text style={{ color: "#666", fontSize: 16, textAlign: "center" }}>
-              No cooks yet.{"\n"}Start one in the Chat tab!
-            </Text>
-          </View>
+        contentContainerStyle={{ padding: 16, paddingBottom: 120, gap: 12 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#c9a0dc" />
         }
-        ListHeaderComponent={
-          activeCooks.length > 0 ? (
-            <Text
-              style={{
-                fontSize: 12,
-                color: "#7ec8e3",
-                fontWeight: "600",
-                textTransform: "uppercase",
-                letterSpacing: 1,
-                marginBottom: 4,
-              }}
-            >
-              Active
-            </Text>
-          ) : null
+        ListFooterComponent={
+          <View style={{ marginTop: count === 0 ? 80 : 4 }}>
+            <StartNewCookCard variant={count === 0 ? "prominent" : "compact"} />
+          </View>
         }
       />
     </SafeAreaView>
