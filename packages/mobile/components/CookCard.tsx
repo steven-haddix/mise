@@ -1,5 +1,7 @@
 import { View, Text } from "react-native";
 import type { CookWithSteps } from "@mise/shared";
+import { emojiForCookTitle } from "../lib/emoji-map";
+import { computeDayOfCook, formatStartDate, formatTimeUntil } from "../lib/time-format";
 
 interface CookCardProps {
   cook: CookWithSteps;
@@ -8,70 +10,109 @@ interface CookCardProps {
 export function CookCard({ cook }: CookCardProps) {
   const isActive = cook.status === "planning" || cook.status === "active";
   const completedSteps = cook.steps.filter((s) => s.status === "completed").length;
-  const progress = cook.steps.length > 0 ? completedSteps / cook.steps.length : 0;
+  const total = cook.steps.length;
+  const progress = total > 0 ? completedSteps / total : 0;
 
-  // Find next pending step
   const now = new Date();
-  const nextStep = cook.steps.find(
-    (s) => s.status === "pending" || s.status === "notified",
-  );
+  const nextStep = cook.steps.find((s) => s.status === "pending" || s.status === "notified");
+  const stepDates = cook.steps.map((s) => new Date(s.scheduledAt));
+  const dayInfo = computeDayOfCook(stepDates, now);
+  const firstStepDate = stepDates.length > 0 ? stepDates[0] : null;
+  const emoji = emojiForCookTitle(cook.title);
 
-  const getTimeUntil = (dateStr: string) => {
-    const diff = new Date(dateStr).getTime() - now.getTime();
-    if (diff < 0) return "now";
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    if (hours > 0) return `${hours}h ${minutes}m`;
-    return `${minutes}m`;
-  };
-
-  const accentColor = isActive ? "#4ade80" : "#666";
+  const subtitleLeft = dayInfo.startsInFuture ? dayInfo.label : dayInfo.label;
+  const subtitleRight = firstStepDate ? `Started ${formatStartDate(firstStepDate)}` : "";
 
   return (
     <View
       style={{
-        backgroundColor: isActive ? "#1a1a2a" : "#151515",
-        borderRadius: 12,
+        backgroundColor: "#1a1a2a",
+        borderRadius: 14,
         padding: 14,
         borderLeftWidth: 3,
-        borderLeftColor: accentColor,
-        opacity: isActive ? 1 : 0.6,
+        borderLeftColor: "#4ade80",
       }}
     >
-      <Text style={{ fontSize: 16, fontWeight: "bold", color: "#fff" }}>{cook.title}</Text>
-      <Text style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
-        Target: {new Date(cook.targetTime).toLocaleString()}
+      {/* Header row */}
+      <View
+        style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}
+      >
+        <Text style={{ fontSize: 16, fontWeight: "700", color: "#fff", flex: 1 }}>
+          {emoji} {cook.title}
+        </Text>
+        {isActive && (
+          <View
+            style={{ backgroundColor: "#1a3a2a", borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 }}
+          >
+            <Text style={{ color: "#4ade80", fontSize: 11, fontWeight: "700" }}>Active</Text>
+          </View>
+        )}
+      </View>
+
+      {/* Day X of Y · Started */}
+      <Text style={{ fontSize: 12, color: "#888", marginTop: 4 }}>
+        {subtitleLeft}
+        {subtitleRight ? ` · ${subtitleRight}` : ""}
       </Text>
 
-      {isActive && nextStep && (
-        <Text style={{ fontSize: 12, color: accentColor, marginTop: 6 }}>
-          ⏱ Next: {nextStep.title} in {getTimeUntil(nextStep.scheduledAt)}
-        </Text>
+      {/* Progress bar + % */}
+      {total > 0 && (
+        <View style={{ marginTop: 10 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <View
+              style={{
+                flex: 1,
+                height: 6,
+                backgroundColor: "#333",
+                borderRadius: 3,
+              }}
+            >
+              <View
+                style={{
+                  width: `${Math.round(progress * 100)}%`,
+                  height: 6,
+                  backgroundColor: "#4ade80",
+                  borderRadius: 3,
+                }}
+              />
+            </View>
+            <Text style={{ color: "#888", fontSize: 12, fontWeight: "600", minWidth: 34, textAlign: "right" }}>
+              {Math.round(progress * 100)}%
+            </Text>
+          </View>
+          <Text style={{ color: "#666", fontSize: 11, marginTop: 4 }}>
+            {completedSteps} of {total} steps complete
+          </Text>
+        </View>
       )}
 
-      {!isActive && (
-        <Text style={{ fontSize: 12, color: "#666", marginTop: 6 }}>
-          Completed {new Date(cook.updatedAt).toLocaleDateString()} ✓
-        </Text>
-      )}
-
-      {isActive && cook.steps.length > 0 && (
+      {/* Next step box */}
+      {isActive && (
         <View
           style={{
-            height: 4,
-            backgroundColor: "#333",
-            borderRadius: 2,
-            marginTop: 8,
+            marginTop: 12,
+            backgroundColor: "#12121f",
+            borderRadius: 10,
+            padding: 10,
           }}
         >
-          <View
-            style={{
-              width: `${progress * 100}%`,
-              height: 4,
-              backgroundColor: accentColor,
-              borderRadius: 2,
-            }}
-          />
+          {nextStep ? (
+            <>
+              <Text style={{ color: "#888", fontSize: 11, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                Next
+              </Text>
+              <Text style={{ color: "#fff", fontSize: 14, fontWeight: "600", marginTop: 2 }}>
+                {nextStep.title}
+              </Text>
+              <Text style={{ color: "#4ade80", fontSize: 12, marginTop: 2 }}>
+                {formatTimeUntil(new Date(nextStep.scheduledAt), now)}
+              </Text>
+            </>
+          ) : (
+            <Text style={{ color: "#888", fontSize: 12 }}>
+              All steps complete — mark cook done on detail screen.
+            </Text>
+          )}
         </View>
       )}
     </View>
