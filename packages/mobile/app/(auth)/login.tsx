@@ -1,6 +1,7 @@
-import { View, Text, Pressable } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text } from "react-native";
+import { Button } from "heroui-native";
 import { authClient } from "../../lib/auth";
+import { Screen } from "../../components/ui";
 
 export default function LoginScreen() {
   const handleGoogleLogin = async () => {
@@ -8,38 +9,17 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#0a0a0a" }}>
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          paddingHorizontal: 32,
-        }}
-      >
-        <Text style={{ fontSize: 48, color: "#c9a0dc", fontWeight: "bold", marginBottom: 8 }}>
-          Mise
-        </Text>
-        <Text style={{ fontSize: 16, color: "#888", textAlign: "center", marginBottom: 48 }}>
+    <Screen>
+      <View className="flex-1 items-center justify-center px-8">
+        <Text className="text-primary text-5xl font-bold mb-2">Mise</Text>
+        <Text className="text-muted-foreground text-base text-center mb-12">
           Your AI kitchen chemist.{"\n"}Every cook, perfectly timed.
         </Text>
 
-        <Pressable
-          onPress={handleGoogleLogin}
-          style={{
-            backgroundColor: "#ffffff",
-            paddingVertical: 14,
-            paddingHorizontal: 32,
-            borderRadius: 12,
-            width: "100%",
-            alignItems: "center",
-          }}
-        >
-          <Text style={{ color: "#000", fontSize: 16, fontWeight: "600" }}>
-            Continue with Google
-          </Text>
-        </Pressable>
+        <Button variant="secondary" onPress={handleGoogleLogin} className="w-full">
+          <Button.Label>Continue with Google</Button.Label>
+        </Button>
       </View>
-    </SafeAreaView>
+    </Screen>
   );
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { View, Text, Pressable, Linking } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, Linking } from "react-native";
+import { Card } from "heroui-native";
 import { LogOut, Bell } from "lucide-react-native";
 import { authClient } from "../../../lib/auth";
 import {
@@ -8,6 +8,7 @@ import {
   requestPermissionAndRegister,
   type PermissionState,
 } from "../../../lib/push-permissions";
+import { Screen, AppHeader, ListRow, tokens } from "../../../components/ui";
 
 export default function ProfileScreen() {
   const { data: session } = authClient.useSession();
@@ -35,86 +36,49 @@ export default function ProfileScreen() {
       Linking.openSettings();
       return;
     }
-    // granted — no-op for v1
   };
 
-  const notifValue =
-    permission === "granted" ? "On" : permission === "denied" ? "Off" : "Not set";
+  const notifValue = permission === "granted" ? "On" : permission === "denied" ? "Off" : "Not set";
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#0a0a0a" }} edges={["top"]}>
-      <View style={{ paddingHorizontal: 16, paddingVertical: 12 }}>
-        <Text style={{ fontSize: 24, fontWeight: "bold", color: "#c9a0dc" }}>Profile</Text>
-      </View>
+    <Screen edges={["top"]}>
+      <AppHeader title="Profile" />
 
-      <View style={{ padding: 16, gap: 24 }}>
-        {/* User info */}
-        <View
-          style={{
-            backgroundColor: "#1a1a2a",
-            borderRadius: 12,
-            padding: 16,
-            gap: 8,
-          }}
-        >
-          <Text style={{ fontSize: 18, fontWeight: "600", color: "#fff" }}>
-            {session?.user?.name || "User"}
-          </Text>
-          <Text style={{ fontSize: 14, color: "#888" }}>{session?.user?.email}</Text>
-        </View>
+      <View className="p-4 gap-6">
+        <Card>
+          <Card.Body>
+            <Text className="text-foreground text-lg font-semibold">
+              {session?.user?.name || "User"}
+            </Text>
+            <Text className="text-muted-foreground text-sm mt-1">{session?.user?.email}</Text>
+          </Card.Body>
+        </Card>
 
-        {/* Notifications */}
-        <Pressable
+        <ListRow
+          icon={<Bell size={18} color={tokens.primary} />}
+          title="Step reminders"
+          value={notifValue}
           onPress={handleNotificationsTap}
-          style={{
-            backgroundColor: "#1a1a2a",
-            borderRadius: 12,
-            padding: 16,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <Bell size={18} color="#c9a0dc" />
-            <Text style={{ color: "#fff", fontSize: 15, fontWeight: "600" }}>Step reminders</Text>
-          </View>
-          <Text style={{ color: "#888", fontSize: 14 }}>{notifValue}</Text>
-        </Pressable>
+        />
 
-        {/* About */}
-        <View
-          style={{
-            backgroundColor: "#1a1a2a",
-            borderRadius: 12,
-            padding: 16,
-            gap: 8,
-          }}
-        >
-          <Text style={{ fontSize: 16, fontWeight: "600", color: "#fff" }}>About Mise</Text>
-          <Text style={{ fontSize: 13, color: "#888", lineHeight: 20 }}>
-            Your warm cooking companion. Tell Mise what you want to cook and when — we'll build the timing plan.
-          </Text>
-          <Text style={{ fontSize: 12, color: "#555", marginTop: 4 }}>v1.0.0</Text>
-        </View>
+        <Card>
+          <Card.Body>
+            <Text className="text-foreground text-base font-semibold">About Mise</Text>
+            <Text className="text-muted-foreground text-sm mt-2 leading-5">
+              Your warm cooking companion. Tell Mise what you want to cook and when — we'll build
+              the timing plan.
+            </Text>
+            <Text className="text-muted-foreground text-xs mt-2 opacity-60">v1.0.0</Text>
+          </Card.Body>
+        </Card>
 
-        {/* Sign out */}
-        <Pressable
+        <ListRow
+          icon={<LogOut size={18} color={tokens.danger} />}
+          title="Sign Out"
+          destructive
           onPress={handleSignOut}
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 8,
-            backgroundColor: "#2a1a1a",
-            paddingVertical: 14,
-            borderRadius: 12,
-          }}
-        >
-          <LogOut size={18} color="#ef4444" />
-          <Text style={{ color: "#ef4444", fontWeight: "600" }}>Sign Out</Text>
-        </Pressable>
+        />
       </View>
-    </SafeAreaView>
+    </Screen>
   );
 }

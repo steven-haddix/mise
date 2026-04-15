@@ -30,6 +30,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   orientation: "portrait",
   icon: "./assets/icon.png",
   userInterfaceStyle: "dark",
+  // Native config hex values mirror global.css tokens (--color-background, --color-primary).
+  // Keep in sync with components/ui/tokens.ts when theme changes.
   splash: {
     image: "./assets/splash.png",
     resizeMode: "contain",

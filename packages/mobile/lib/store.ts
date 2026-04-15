@@ -51,6 +51,5 @@ export const useStore = create<MiseStore>((set) => ({
   setIsStreaming: (isStreaming) => set({ isStreaming }),
   streamingText: "",
   setStreamingText: (streamingText) => set({ streamingText }),
-  appendStreamingText: (chunk) =>
-    set((state) => ({ streamingText: state.streamingText + chunk })),
+  appendStreamingText: (chunk) => set((state) => ({ streamingText: state.streamingText + chunk })),
 }));

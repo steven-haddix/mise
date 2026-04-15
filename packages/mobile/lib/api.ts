@@ -1,12 +1,7 @@
 import { fetch as expoFetch } from "expo/fetch";
 import { API_BASE_URL } from "./config";
 import { authClient } from "./auth";
-import type {
-  Cook,
-  CookWithSteps,
-  Conversation,
-  ConversationWithMessages,
-} from "@mise/shared";
+import type { Cook, CookWithSteps, Conversation, ConversationWithMessages } from "@mise/shared";
 
 function authHeaders(): Record<string, string> {
   const cookie = authClient.getCookie();
@@ -119,10 +114,10 @@ export function patchMessage(
   messageId: string,
   body: { proposalState: "confirmed" | "superseded"; createdCookId?: string },
 ) {
-  return fetchApi<{ ok: true }>(
-    `/api/v1/conversations/${conversationId}/messages/${messageId}`,
-    { method: "PATCH", body: JSON.stringify(body) },
-  );
+  return fetchApi<{ ok: true }>(`/api/v1/conversations/${conversationId}/messages/${messageId}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
 }
 
 // Cook creation from a confirmed plan
@@ -151,7 +146,10 @@ export async function createCook(
   }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: "Request failed" }));
-    throw Object.assign(new Error(err.error || `HTTP ${res.status}`), { status: res.status, notes: err.notes });
+    throw Object.assign(new Error(err.error || `HTTP ${res.status}`), {
+      status: res.status,
+      notes: err.notes,
+    });
   }
   return res.json();
 }

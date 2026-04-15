@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View, Text, ScrollView, Pressable } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { ArrowLeft, MessageCircle } from "lucide-react-native";
+import { MessageCircle } from "lucide-react-native";
+import { Button, Spinner, Dialog } from "heroui-native";
 import { getCook, updateStep, updateCook } from "../../../lib/api";
 import { TimelineStep } from "../../../components/TimelineStep";
+import { Screen, AppHeader, tokens } from "../../../components/ui";
 import type { CookWithSteps } from "@mise/shared";
 
 export default function CookTimelineScreen() {
@@ -12,6 +13,7 @@ export default function CookTimelineScreen() {
   const [cook, setCook] = useState<CookWithSteps | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
 
   useEffect(() => {
     if (!cookId) return;
@@ -34,41 +36,39 @@ export default function CookTimelineScreen() {
     setCook(updated);
   };
 
+  const handleCancel = async () => {
+    if (!cook) return;
+    try {
+      await updateCook(cook.id, { status: "cancelled" });
+      setCancelOpen(false);
+      router.back();
+    } catch (err) {
+      console.error("[CookDetail] cancel error:", err);
+    }
+  };
+
   if (loading) {
     return (
-      <View style={{ flex: 1, backgroundColor: "#0a0a0a", alignItems: "center", justifyContent: "center" }}>
-        <ActivityIndicator color="#c9a0dc" />
+      <View className="flex-1 bg-background items-center justify-center">
+        <Spinner color={tokens.primary} />
       </View>
     );
   }
 
   if (notFound || !cook) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#0a0a0a" }}>
-        <View style={{ padding: 16 }}>
-          <Pressable onPress={() => router.back()} hitSlop={8}>
-            <ArrowLeft size={24} color="#888" />
-          </Pressable>
-        </View>
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 24 }}>
-          <Text style={{ fontSize: 40, marginBottom: 12 }}>🍳</Text>
-          <Text style={{ color: "#aaa", fontSize: 16, textAlign: "center" }}>
+      <Screen>
+        <AppHeader onBack={() => router.back()} />
+        <View className="flex-1 items-center justify-center p-6">
+          <Text className="text-4xl mb-3">🍳</Text>
+          <Text className="text-muted-foreground text-base text-center">
             This cook was removed.
           </Text>
-          <Pressable
-            onPress={() => router.back()}
-            style={{
-              marginTop: 16,
-              backgroundColor: "#2a1a3a",
-              paddingHorizontal: 18,
-              paddingVertical: 10,
-              borderRadius: 20,
-            }}
-          >
-            <Text style={{ color: "#c9a0dc", fontWeight: "600" }}>Back</Text>
-          </Pressable>
+          <Button variant="secondary" onPress={() => router.back()} className="mt-4">
+            <Button.Label>Back</Button.Label>
+          </Button>
         </View>
-      </SafeAreaView>
+      </Screen>
     );
   }
 
@@ -76,64 +76,35 @@ export default function CookTimelineScreen() {
   const progress = cook.steps.length > 0 ? completedSteps / cook.steps.length : 0;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#0a0a0a" }}>
-      {/* Header */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          paddingHorizontal: 16,
-          paddingVertical: 12,
-        }}
-      >
-        <Pressable onPress={() => router.back()} hitSlop={8}>
-          <ArrowLeft size={24} color="#888" />
-        </Pressable>
-        <Text style={{ fontSize: 18, fontWeight: "bold", color: "#fff", flex: 1, textAlign: "center" }}>
-          {cook.title}
-        </Text>
-        <Pressable
-          onPress={() => {
-            if (cook.conversationId) {
-              router.push(`/(tabs)/(chat)/${cook.conversationId}` as any);
-            }
-          }}
-          hitSlop={8}
-        >
-          <MessageCircle size={22} color="#c9a0dc" />
-        </Pressable>
-      </View>
+    <Screen>
+      <AppHeader
+        title={cook.title}
+        onBack={() => router.back()}
+        rightAction={
+          cook.conversationId ? (
+            <Pressable
+              onPress={() => router.push(`/(tabs)/(chat)/${cook.conversationId}` as never)}
+              hitSlop={8}
+              className="w-10 h-10 items-center justify-center"
+            >
+              <MessageCircle size={22} color={tokens.primary} />
+            </Pressable>
+          ) : undefined
+        }
+      />
 
-      {/* Target time + progress */}
-      <View style={{ alignItems: "center", paddingBottom: 16 }}>
-        <Text style={{ color: "#888", fontSize: 13 }}>
+      <View className="items-center pb-4">
+        <Text className="text-muted-foreground text-sm">
           Target: {new Date(cook.targetTime).toLocaleString()}
         </Text>
-        <View
-          style={{
-            width: "60%",
-            height: 4,
-            backgroundColor: "#333",
-            borderRadius: 2,
-            marginTop: 8,
-          }}
-        >
-          <View
-            style={{
-              width: `${progress * 100}%`,
-              height: 4,
-              backgroundColor: "#4ade80",
-              borderRadius: 2,
-            }}
-          />
+        <View className="w-[60%] h-1 bg-muted rounded-sm mt-2">
+          <View style={{ width: `${progress * 100}%` }} className="h-1 bg-success rounded-sm" />
         </View>
-        <Text style={{ color: "#666", fontSize: 11, marginTop: 4 }}>
+        <Text className="text-muted-foreground text-xs mt-1">
           {completedSteps} / {cook.steps.length} steps complete
         </Text>
       </View>
 
-      {/* Timeline */}
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
         {cook.steps.map((step, index) => (
           <TimelineStep
@@ -144,41 +115,31 @@ export default function CookTimelineScreen() {
           />
         ))}
         {cook.status !== "cancelled" && cook.status !== "completed" && (
-          <Pressable
-            onPress={() => {
-              Alert.alert(
-                "Cancel cook?",
-                "This will stop reminders and remove it from Home. You can't undo this.",
-                [
-                  { text: "Keep cooking", style: "cancel" },
-                  {
-                    text: "Cancel cook",
-                    style: "destructive",
-                    onPress: async () => {
-                      try {
-                        await updateCook(cook.id, { status: "cancelled" });
-                        router.back();
-                      } catch (err) {
-                        console.error("[CookDetail] cancel error:", err);
-                      }
-                    },
-                  },
-                ],
-              );
-            }}
-            style={{
-              marginTop: 24,
-              paddingVertical: 12,
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: "#5a1a1a",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ color: "#f87171", fontWeight: "600" }}>Cancel cook</Text>
-          </Pressable>
+          <Button variant="danger-soft" onPress={() => setCancelOpen(true)} className="mt-6">
+            <Button.Label>Cancel cook</Button.Label>
+          </Button>
         )}
       </ScrollView>
-    </SafeAreaView>
+
+      <Dialog isOpen={cancelOpen} onOpenChange={setCancelOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay />
+          <Dialog.Content>
+            <Dialog.Title className="text-foreground text-lg font-bold">Cancel cook?</Dialog.Title>
+            <Dialog.Description className="text-muted-foreground text-sm leading-5">
+              This will stop reminders and remove it from Home. You can't undo this.
+            </Dialog.Description>
+            <View className="flex-row gap-2.5 mt-4">
+              <Button variant="tertiary" onPress={() => setCancelOpen(false)} className="flex-1">
+                <Button.Label>Keep cooking</Button.Label>
+              </Button>
+              <Button variant="danger" onPress={handleCancel} className="flex-1">
+                <Button.Label>Cancel cook</Button.Label>
+              </Button>
+            </View>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog>
+    </Screen>
   );
 }

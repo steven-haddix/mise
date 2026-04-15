@@ -1,12 +1,12 @@
 import { useState, useCallback } from "react";
 import { View, Text, FlatList, Pressable, RefreshControl } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, router } from "expo-router";
 import { useStore } from "../../../lib/store";
 import { listCooks } from "../../../lib/api";
 import { CookCard } from "../../../components/CookCard";
 import { StartNewCookCard } from "../../../components/StartNewCookCard";
 import { getGreeting } from "../../../lib/time-format";
+import { Screen, tokens } from "../../../components/ui";
 
 export default function CooksScreen() {
   const { activeCooks, setCooks } = useStore();
@@ -42,30 +42,34 @@ export default function CooksScreen() {
         : `${count} active cooks today.`;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#0a0a0a" }} edges={["top"]}>
-      <View style={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 }}>
-        <Text style={{ fontSize: 28, fontWeight: "700", color: "#fff" }}>{getGreeting()}</Text>
-        <Text style={{ fontSize: 14, color: "#888", marginTop: 4 }}>{subtitle}</Text>
+    <Screen edges={["top"]}>
+      <View className="px-5 pt-3 pb-2">
+        <Text className="text-foreground text-3xl font-bold">{getGreeting()}</Text>
+        <Text className="text-muted-foreground text-sm mt-1">{subtitle}</Text>
       </View>
 
       <FlatList
         data={activeCooks}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <Pressable onPress={() => router.push(`/(tabs)/(cooks)/${item.id}` as any)}>
+          <Pressable onPress={() => router.push(`/(tabs)/(cooks)/${item.id}` as never)}>
             <CookCard cook={item} />
           </Pressable>
         )}
         contentContainerStyle={{ padding: 16, paddingBottom: 120, gap: 12 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#c9a0dc" />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={tokens.primary}
+          />
         }
         ListFooterComponent={
-          <View style={{ marginTop: count === 0 ? 80 : 4 }}>
+          <View className={count === 0 ? "mt-20" : "mt-1"}>
             <StartNewCookCard variant={count === 0 ? "prominent" : "compact"} />
           </View>
         }
       />
-    </SafeAreaView>
+    </Screen>
   );
 }

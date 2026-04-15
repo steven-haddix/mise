@@ -131,4 +131,24 @@ describe("validatePlan", () => {
     expect(result.ok).toBe(false);
     expect(result.notes.join(" ")).toMatch(/targetTime/i);
   });
+
+  it("rejects step scheduledAt that encodes a comma-separated range", () => {
+    const result = validatePlan(
+      {
+        title: "Sourdough",
+        targetTime: tomorrow.toISOString(),
+        steps: [
+          { title: "Mix", description: "x", scheduledAt: new Date("2026-04-12T14:00:00Z").toISOString() },
+          {
+            title: "Overnight Bulk Ferment",
+            description: "y",
+            scheduledAt: "2026-04-12T17:00:00Z,2026-04-13T08:00:00Z",
+          },
+        ],
+      },
+      now,
+    );
+    expect(result.ok).toBe(false);
+    expect(result.notes.join(" ")).toMatch(/invalid scheduledAt/i);
+  });
 });

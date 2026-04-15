@@ -2,6 +2,7 @@ import { View, StyleSheet, Platform } from "react-native";
 import { Tabs } from "expo-router";
 import { BlurView } from "expo-blur";
 import { MessageCircle, ChefHat, User } from "lucide-react-native";
+import { tokens } from "../../components/ui/tokens";
 
 function TabBarBackground() {
   if (Platform.OS === "android") {
@@ -19,15 +20,15 @@ function TabBarBackground() {
 
 const styles = StyleSheet.create({
   androidTabBarBg: {
-    backgroundColor: "rgba(10, 10, 10, 0.8)",
+    backgroundColor: tokens.tabBarBackgroundAndroid,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "rgba(255, 255, 255, 0.08)",
+    borderTopColor: tokens.hairlineBorder,
   },
 });
 
 export default function TabsLayout() {
   return (
-    <View style={{ flex: 1 }}>
+    <View className="flex-1">
       <Tabs
         initialRouteName="(cooks)"
         screenOptions={{
@@ -39,8 +40,8 @@ export default function TabsLayout() {
             position: "absolute",
           },
           tabBarBackground: () => <TabBarBackground />,
-          tabBarActiveTintColor: "#c9a0dc",
-          tabBarInactiveTintColor: "rgba(255,255,255,0.45)",
+          tabBarActiveTintColor: tokens.primary,
+          tabBarInactiveTintColor: tokens.mutedForeground,
         }}
       >
         <Tabs.Screen

@@ -30,4 +30,9 @@
   --color-border: hsl(0, 0%, 18%);
   --color-input: hsl(0, 0%, 18%);
   --color-ring: hsl(270, 60%, 70%);
+
+  --color-primary-muted: hsl(270, 30%, 18%);
+  --color-success-muted: hsl(142, 30%, 18%);
+  --color-warning-muted: hsl(48, 40%, 20%);
+  --color-danger-muted: hsl(0, 40%, 20%);
 }

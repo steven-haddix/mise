@@ -37,6 +37,42 @@ export function formatClock(d: Date): string {
   return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 }
 
+export interface StepTimestamp {
+  dayLabel: string | null;
+  time: string;
+}
+
+/**
+ * Given ordered step start times, return parallel `{ dayLabel, time }` entries.
+ * `dayLabel` is set on the first entry and whenever a step falls on a different
+ * calendar day than the previous valid entry — `"TODAY"`, `"TOMORROW"`, or an
+ * uppercased short weekday (`"THU"`). Invalid entries in the input (null) map
+ * to null in the output and do not reset the day-change tracking.
+ */
+export function formatStepTimestamps(
+  dates: Array<Date | null>,
+  now: Date = new Date(),
+): Array<StepTimestamp | null> {
+  const todayKey = dayKey(now);
+  const tomorrowKey = dayKey(addDays(now, 1));
+
+  let prevDayKey: string | null = null;
+  return dates.map((d) => {
+    if (!d) return null;
+    const thisDayKey = dayKey(d);
+    const time = formatClock(d);
+    if (thisDayKey === prevDayKey) {
+      return { dayLabel: null, time };
+    }
+    let label: string;
+    if (thisDayKey === todayKey) label = "TODAY";
+    else if (thisDayKey === tomorrowKey) label = "TOMORROW";
+    else label = weekdayShort(d).toUpperCase();
+    prevDayKey = thisDayKey;
+    return { dayLabel: label, time };
+  });
+}
+
 /**
  * Formats a duration in seconds as "~N hours" or "~N minutes". Designed
  * for the "Total time" meta row on the plan preview.

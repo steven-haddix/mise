@@ -1,4 +1,5 @@
 import { View, Text } from "react-native";
+import { Card, Chip } from "heroui-native";
 import type { CookWithSteps } from "@mise/shared";
 import { emojiForCookTitle } from "../lib/emoji-map";
 import { computeDayOfCook, formatStartDate, formatTimeUntil } from "../lib/time-format";
@@ -20,101 +21,67 @@ export function CookCard({ cook }: CookCardProps) {
   const firstStepDate = stepDates.length > 0 ? stepDates[0] : null;
   const emoji = emojiForCookTitle(cook.title);
 
-  const subtitleLeft = dayInfo.startsInFuture ? dayInfo.label : dayInfo.label;
+  const subtitleLeft = dayInfo.label;
   const subtitleRight = firstStepDate ? `Started ${formatStartDate(firstStepDate)}` : "";
 
   return (
-    <View
-      style={{
-        backgroundColor: "#1a1a2a",
-        borderRadius: 14,
-        padding: 14,
-        borderLeftWidth: 3,
-        borderLeftColor: "#4ade80",
-      }}
-    >
-      {/* Header row */}
-      <View
-        style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}
-      >
-        <Text style={{ fontSize: 16, fontWeight: "700", color: "#fff", flex: 1 }}>
-          {emoji} {cook.title}
-        </Text>
-        {isActive && (
-          <View
-            style={{ backgroundColor: "#1a3a2a", borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 }}
-          >
-            <Text style={{ color: "#4ade80", fontSize: 11, fontWeight: "700" }}>Active</Text>
-          </View>
-        )}
-      </View>
-
-      {/* Day X of Y · Started */}
-      <Text style={{ fontSize: 12, color: "#888", marginTop: 4 }}>
-        {subtitleLeft}
-        {subtitleRight ? ` · ${subtitleRight}` : ""}
-      </Text>
-
-      {/* Progress bar + % */}
-      {total > 0 && (
-        <View style={{ marginTop: 10 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <View
-              style={{
-                flex: 1,
-                height: 6,
-                backgroundColor: "#333",
-                borderRadius: 3,
-              }}
-            >
-              <View
-                style={{
-                  width: `${Math.round(progress * 100)}%`,
-                  height: 6,
-                  backgroundColor: "#4ade80",
-                  borderRadius: 3,
-                }}
-              />
-            </View>
-            <Text style={{ color: "#888", fontSize: 12, fontWeight: "600", minWidth: 34, textAlign: "right" }}>
-              {Math.round(progress * 100)}%
-            </Text>
-          </View>
-          <Text style={{ color: "#666", fontSize: 11, marginTop: 4 }}>
-            {completedSteps} of {total} steps complete
+    <Card className="border-l-4 border-l-success">
+      <Card.Body>
+        <View className="flex-row items-center justify-between">
+          <Text className="text-foreground text-base font-bold flex-1">
+            {emoji} {cook.title}
           </Text>
-        </View>
-      )}
-
-      {/* Next step box */}
-      {isActive && (
-        <View
-          style={{
-            marginTop: 12,
-            backgroundColor: "#12121f",
-            borderRadius: 10,
-            padding: 10,
-          }}
-        >
-          {nextStep ? (
-            <>
-              <Text style={{ color: "#888", fontSize: 11, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                Next
-              </Text>
-              <Text style={{ color: "#fff", fontSize: 14, fontWeight: "600", marginTop: 2 }}>
-                {nextStep.title}
-              </Text>
-              <Text style={{ color: "#4ade80", fontSize: 12, marginTop: 2 }}>
-                {formatTimeUntil(new Date(nextStep.scheduledAt), now)}
-              </Text>
-            </>
-          ) : (
-            <Text style={{ color: "#888", fontSize: 12 }}>
-              All steps complete — mark cook done on detail screen.
-            </Text>
+          {isActive && (
+            <Chip size="sm" color="success" variant="soft">
+              <Chip.Label>Active</Chip.Label>
+            </Chip>
           )}
         </View>
-      )}
-    </View>
+
+        <Text className="text-muted-foreground text-xs mt-1">
+          {subtitleLeft}
+          {subtitleRight ? ` · ${subtitleRight}` : ""}
+        </Text>
+
+        {total > 0 && (
+          <View className="mt-2.5">
+            <View className="flex-row items-center gap-2.5">
+              <View className="flex-1 h-1.5 bg-muted rounded-sm">
+                <View
+                  style={{ width: `${Math.round(progress * 100)}%` }}
+                  className="h-1.5 bg-success rounded-sm"
+                />
+              </View>
+              <Text className="text-muted-foreground text-xs font-semibold text-right min-w-[34px]">
+                {Math.round(progress * 100)}%
+              </Text>
+            </View>
+            <Text className="text-muted-foreground text-xs mt-1">
+              {completedSteps} of {total} steps complete
+            </Text>
+          </View>
+        )}
+
+        {isActive && (
+          <View className="mt-3 bg-background rounded-lg p-2.5">
+            {nextStep ? (
+              <>
+                <Text className="text-muted-foreground text-xs uppercase tracking-wider">Next</Text>
+                <Text className="text-foreground text-sm font-semibold mt-0.5">
+                  {nextStep.title}
+                </Text>
+                <Text className="text-success text-xs mt-0.5">
+                  {formatTimeUntil(new Date(nextStep.scheduledAt), now)}
+                </Text>
+              </>
+            ) : (
+              <Text className="text-muted-foreground text-xs">
+                All steps complete — mark cook done on detail screen.
+              </Text>
+            )}
+          </View>
+        )}
+      </Card.Body>
+    </Card>
   );
 }

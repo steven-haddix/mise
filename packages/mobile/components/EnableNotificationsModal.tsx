@@ -1,4 +1,5 @@
-import { Modal, View, Text, Pressable } from "react-native";
+import { View, Text } from "react-native";
+import { Dialog, Button } from "heroui-native";
 
 interface Props {
   visible: boolean;
@@ -8,61 +9,32 @@ interface Props {
 
 export function EnableNotificationsModal({ visible, onEnable, onDismiss }: Props) {
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.65)",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 24,
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: "#1a1a2a",
-            borderRadius: 18,
-            padding: 22,
-            width: "100%",
-            maxWidth: 340,
-            gap: 10,
-          }}
-        >
-          <Text style={{ fontSize: 40, textAlign: "center", marginBottom: 4 }}>🔔</Text>
-          <Text style={{ color: "#fff", fontSize: 18, fontWeight: "700", textAlign: "center" }}>
+    <Dialog
+      isOpen={visible}
+      onOpenChange={(open) => {
+        if (!open) onDismiss();
+      }}
+    >
+      <Dialog.Portal>
+        <Dialog.Overlay />
+        <Dialog.Content>
+          <Text className="text-4xl text-center mb-1">🔔</Text>
+          <Dialog.Title className="text-foreground text-lg font-bold text-center">
             Want reminders for each step?
-          </Text>
-          <Text style={{ color: "#aaa", fontSize: 14, textAlign: "center", lineHeight: 20 }}>
+          </Dialog.Title>
+          <Dialog.Description className="text-muted-foreground text-sm text-center leading-5">
             Mise can ping you when it's time for the next step in your cook.
-          </Text>
-          <View style={{ flexDirection: "row", gap: 10, marginTop: 14 }}>
-            <Pressable
-              onPress={onDismiss}
-              style={{
-                flex: 1,
-                paddingVertical: 12,
-                borderRadius: 10,
-                backgroundColor: "#2a2a3a",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ color: "#aaa", fontWeight: "600" }}>Not now</Text>
-            </Pressable>
-            <Pressable
-              onPress={onEnable}
-              style={{
-                flex: 1,
-                paddingVertical: 12,
-                borderRadius: 10,
-                backgroundColor: "#c9a0dc",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ color: "#0a0a0a", fontWeight: "700" }}>Enable</Text>
-            </Pressable>
+          </Dialog.Description>
+          <View className="flex-row gap-2.5 mt-4">
+            <Button variant="tertiary" onPress={onDismiss} className="flex-1">
+              <Button.Label>Not now</Button.Label>
+            </Button>
+            <Button variant="primary" onPress={onEnable} className="flex-1">
+              <Button.Label>Enable</Button.Label>
+            </Button>
           </View>
-        </View>
-      </View>
-    </Modal>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog>
   );
 }
