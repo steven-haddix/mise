@@ -1,4 +1,6 @@
+import { fetch as expoFetch } from "expo/fetch";
 import { API_BASE_URL } from "./config";
+import { authClient } from "./auth";
 import type {
   Cook,
   CookWithSteps,
@@ -6,15 +8,30 @@ import type {
   ConversationWithMessages,
 } from "@mise/shared";
 
+function authHeaders(): Record<string, string> {
+  const cookie = authClient.getCookie();
+  return cookie ? { Cookie: cookie } : {};
+}
+
+async function handleUnauthorized() {
+  await authClient.signOut().catch(() => {});
+}
+
 async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
+      ...authHeaders(),
       ...options?.headers,
     },
     credentials: "include",
   });
+
+  if (res.status === 401) {
+    await handleUnauthorized();
+    throw new Error("Unauthorized");
+  }
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({ error: "Request failed" }));
@@ -30,17 +47,24 @@ export async function sendMessage(body: {
   conversationId?: string;
   targetTime?: string;
 }): Promise<{ conversationId: string; stream: ReadableStream<Uint8Array> }> {
-  const res = await fetch(`${API_BASE_URL}/api/v1/chat`, {
+  // Use expo/fetch — RN's built-in fetch buffers the response and doesn't
+  // expose `body` as a ReadableStream, so `.getReader()` crashes.
+  const res = await expoFetch(`${API_BASE_URL}/api/v1/chat`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     credentials: "include",
     body: JSON.stringify(body),
   });
 
+  if (res.status === 401) {
+    await handleUnauthorized();
+    throw new Error("Unauthorized");
+  }
   if (!res.ok) throw new Error(`Chat failed: ${res.status}`);
 
   const conversationId = res.headers.get("X-Conversation-Id") || "";
-  return { conversationId, stream: res.body! };
+  if (!res.body) throw new Error("Chat response has no body");
+  return { conversationId, stream: res.body };
 }
 
 export function listConversations() {
@@ -117,9 +141,14 @@ export async function createCook(
     headers: {
       "Content-Type": "application/json",
       "X-Proposal-Id": proposalId,
+      ...authHeaders(),
     },
     body: JSON.stringify(body),
   });
+  if (res.status === 401) {
+    await handleUnauthorized();
+    throw new Error("Unauthorized");
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: "Request failed" }));
     throw Object.assign(new Error(err.error || `HTTP ${res.status}`), { status: res.status, notes: err.notes });

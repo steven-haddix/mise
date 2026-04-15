@@ -1,10 +1,10 @@
 import { google } from "@ai-sdk/google";
 import { tool } from "ai";
 import { z } from "zod";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { validatePlan } from "./plan-validation.js";
 
-export const model = google("gemini-2.5-flash-lite-preview-06-17");
+export const model = google("gemini-3.1-flash-lite-preview");
 
 const SYSTEM_PROMPT = `You are Mise — a warm, competent cooking companion who helps people time long cooks: sourdough, smoked meats, ferments, braises, anything where timing matters. You are conversational, concise, and practical.
 
@@ -31,62 +31,65 @@ How you operate:
 CRITICAL: NEVER use hardcoded timing rules. Every timing calculation must come from your own reasoning about the specific recipe, conditions, and constraints the user describes. Each cook is unique.`;
 
 const proposePlanSchema = z.object({
-  title: z.string().describe("Short name for the cook, e.g. 'Sourdough Bread'"),
-  targetTime: z
-    .string()
-    .describe("ISO 8601 timestamp for when the user wants to eat/serve"),
-  steps: z
-    .array(
-      z.object({
-        title: z.string().describe("Short step name, e.g. 'Feed your starter'"),
-        description: z.string().describe("Detailed instructions for this step"),
-        scheduledAt: z
-          .string()
-          .describe("ISO 8601 timestamp for when this step should happen"),
-      }),
-    )
-    .describe("All steps in chronological order, each with an absolute scheduled time."),
+	title: z.string().describe("Short name for the cook, e.g. 'Sourdough Bread'"),
+	targetTime: z
+		.string()
+		.describe("ISO 8601 timestamp for when the user wants to eat/serve"),
+	steps: z
+		.array(
+			z.object({
+				title: z.string().describe("Short step name, e.g. 'Feed your starter'"),
+				description: z.string().describe("Detailed instructions for this step"),
+				scheduledAt: z
+					.string()
+					.describe("ISO 8601 timestamp for when this step should happen"),
+			}),
+		)
+		.describe(
+			"All steps in chronological order, each with an absolute scheduled time.",
+		),
 });
 
 type ProposePlanInput = z.infer<typeof proposePlanSchema>;
 
 export function createAITools() {
-  return {
-    propose_plan: tool({
-      description:
-        "Propose a complete cooking timeline to the user as a preview card. This does NOT save anything — the user must confirm by tapping 'Build it' in the UI. Always call this when the user wants to cook something specific.",
-      inputSchema: proposePlanSchema,
-      execute: async ({ title, targetTime, steps }: ProposePlanInput) => {
-        const validation = validatePlan({ title, targetTime, steps });
+	return {
+		propose_plan: tool({
+			description:
+				"Propose a complete cooking timeline to the user as a preview card. This does NOT save anything — the user must confirm by tapping 'Build it' in the UI. Always call this when the user wants to cook something specific.",
+			inputSchema: proposePlanSchema,
+			execute: async ({ title, targetTime, steps }: ProposePlanInput) => {
+				const validation = validatePlan({ title, targetTime, steps });
 
-        const proposalId = randomUUID();
-        const stepsWithDurations = steps.map((step, i) => {
-          const prev = i === 0 ? null : steps[i - 1];
-          const durationFromPrev =
-            prev === null
-              ? 0
-              : Math.max(
-                  0,
-                  Math.floor(
-                    (new Date(step.scheduledAt).getTime() - new Date(prev.scheduledAt).getTime()) /
-                      1000,
-                  ),
-                );
-          return { ...step, durationFromPrev };
-        });
+				const proposalId = randomUUID();
+				const stepsWithDurations = steps.map((step, i) => {
+					const prev = i === 0 ? null : steps[i - 1];
+					const durationFromPrev =
+						prev === null
+							? 0
+							: Math.max(
+									0,
+									Math.floor(
+										(new Date(step.scheduledAt).getTime() -
+											new Date(prev.scheduledAt).getTime()) /
+											1000,
+									),
+								);
+					return { ...step, durationFromPrev };
+				});
 
-        return {
-          proposalId,
-          title,
-          targetTime,
-          steps: stepsWithDurations,
-          state: "active" as const,
-          createdCookId: null as string | null,
-          validationNotes: validation.notes,
-        };
-      },
-    }),
-  };
+				return {
+					proposalId,
+					title,
+					targetTime,
+					steps: stepsWithDurations,
+					state: "active" as const,
+					createdCookId: null as string | null,
+					validationNotes: validation.notes,
+				};
+			},
+		}),
+	};
 }
 
 export { SYSTEM_PROMPT };
