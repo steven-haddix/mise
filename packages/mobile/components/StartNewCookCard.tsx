@@ -12,22 +12,22 @@ export function StartNewCookCard({ variant = "compact" }: Props) {
   return (
     <Pressable
       onPress={() => router.push("/(tabs)/(chat)?new=1" as never)}
-      className={`bg-card rounded-2xl border border-dashed border-primary flex-row items-center gap-3 px-4 ${
-        prominent ? "py-7" : "py-4"
+      className={`bg-card rounded-xl border border-dashed border-primary/40 flex-row items-center gap-4 px-4 ${
+        prominent ? "py-8" : "py-4"
       }`}
     >
       <View
-        className={`rounded-full bg-primary-muted items-center justify-center ${
+        className={`rounded-lg bg-primary/10 items-center justify-center border border-primary/20 ${
           prominent ? "w-11 h-11" : "w-9 h-9"
         }`}
       >
-        <Plus size={prominent ? 24 : 20} color={tokens.primary} />
+        <Plus size={prominent ? 22 : 18} color={tokens.primary} strokeWidth={2.5} />
       </View>
       <View className="flex-1">
-        <Text className={`text-foreground font-semibold ${prominent ? "text-lg" : "text-base"}`}>
+        <Text className={`text-foreground font-bold tracking-tight ${prominent ? "text-lg" : "text-base"}`}>
           {prominent ? "Tap to start your first cook" : "Start a new cook"}
         </Text>
-        <Text className="text-muted-foreground text-xs mt-0.5">Tell Mise what you're making</Text>
+        <Text className="text-muted-foreground text-[12px] font-medium mt-0.5 opacity-80">Tell Mise what you're making</Text>
       </View>
     </Pressable>
   );

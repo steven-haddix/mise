@@ -14,7 +14,7 @@ function TabBarBackground() {
   }
 
   return (
-    <BlurView intensity={80} tint="systemChromeMaterialDark" style={StyleSheet.absoluteFill} />
+    <BlurView intensity={80} tint="dark" style={StyleSheet.absoluteFill} />
   );
 }
 
@@ -38,31 +38,38 @@ export default function TabsLayout() {
             borderTopWidth: 0,
             elevation: 0,
             position: "absolute",
+            height: Platform.OS === "ios" ? 88 : 64,
           },
           tabBarBackground: () => <TabBarBackground />,
           tabBarActiveTintColor: tokens.primary,
           tabBarInactiveTintColor: tokens.mutedForeground,
+          tabBarLabelStyle: {
+            fontSize: 11,
+            fontWeight: "bold",
+            marginTop: -4,
+            marginBottom: Platform.OS === "ios" ? 0 : 4,
+          },
         }}
       >
         <Tabs.Screen
           name="(cooks)"
           options={{
             title: "Home",
-            tabBarIcon: ({ color, size }) => <ChefHat size={size} color={color} />,
+            tabBarIcon: ({ color, size }) => <ChefHat size={size - 2} color={color} strokeWidth={2.5} />,
           }}
         />
         <Tabs.Screen
           name="(chat)"
           options={{
             title: "Chat",
-            tabBarIcon: ({ color, size }) => <MessageCircle size={size} color={color} />,
+            tabBarIcon: ({ color, size }) => <MessageCircle size={size - 2} color={color} strokeWidth={2.5} />,
           }}
         />
         <Tabs.Screen
           name="(profile)"
           options={{
             title: "Profile",
-            tabBarIcon: ({ color, size }) => <User size={size} color={color} />,
+            tabBarIcon: ({ color, size }) => <User size={size - 2} color={color} strokeWidth={2.5} />,
           }}
         />
       </Tabs>

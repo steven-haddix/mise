@@ -25,58 +25,57 @@ export function CookCard({ cook }: CookCardProps) {
   const subtitleRight = firstStepDate ? `Started ${formatStartDate(firstStepDate)}` : "";
 
   return (
-    <Card className="border-l-4 border-l-success">
-      <Card.Body>
+    <Card className="rounded-xl border-l-[3px] border-l-success bg-card shadow-none">
+      <Card.Body className="p-3.5">
         <View className="flex-row items-center justify-between">
-          <Text className="text-foreground text-base font-bold flex-1">
+          <Text className="text-foreground text-[16px] font-bold flex-1">
             {emoji} {cook.title}
           </Text>
           {isActive && (
-            <Chip size="sm" color="success" variant="soft">
-              <Chip.Label>Active</Chip.Label>
+            <Chip size="sm" color="success" variant="soft" className="rounded-md h-5 px-1.5 border-success/30">
+              <Chip.Label className="text-[9px] font-bold tracking-wider uppercase">Active</Chip.Label>
             </Chip>
           )}
         </View>
 
-        <Text className="text-muted-foreground text-xs mt-1">
+        <Text className="text-muted-foreground text-[12px] font-medium mt-0.5">
           {subtitleLeft}
           {subtitleRight ? ` · ${subtitleRight}` : ""}
         </Text>
 
         {total > 0 && (
-          <View className="mt-2.5">
-            <View className="flex-row items-center gap-2.5">
-              <View className="flex-1 h-1.5 bg-muted rounded-sm">
+          <View className="mt-3">
+            <View className="flex-row items-center gap-3">
+              <View className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
                 <View
                   style={{ width: `${Math.round(progress * 100)}%` }}
-                  className="h-1.5 bg-success rounded-sm"
+                  className="h-full bg-success rounded-full"
                 />
               </View>
-              <Text className="text-muted-foreground text-xs font-semibold text-right min-w-[34px]">
+              <Text className="text-muted-foreground text-[11px] font-bold text-right min-w-[34px]">
                 {Math.round(progress * 100)}%
               </Text>
             </View>
-            <Text className="text-muted-foreground text-xs mt-1">
-              {completedSteps} of {total} steps complete
-            </Text>
           </View>
         )}
 
         {isActive && (
-          <View className="mt-3 bg-background rounded-lg p-2.5">
+          <View className="mt-3 bg-background/50 rounded-lg p-2.5 border border-border/10">
             {nextStep ? (
-              <>
-                <Text className="text-muted-foreground text-xs uppercase tracking-wider">Next</Text>
-                <Text className="text-foreground text-sm font-semibold mt-0.5">
-                  {nextStep.title}
-                </Text>
-                <Text className="text-success text-xs mt-0.5">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-1">
+                  <Text className="text-muted-foreground text-[9px] font-bold uppercase tracking-widest">Next</Text>
+                  <Text className="text-foreground text-[14px] font-semibold mt-0.5" numberOfLines={1}>
+                    {nextStep.title}
+                  </Text>
+                </View>
+                <Text className="text-success text-[12px] font-bold ml-2">
                   {formatTimeUntil(new Date(nextStep.scheduledAt), now)}
                 </Text>
-              </>
+              </View>
             ) : (
-              <Text className="text-muted-foreground text-xs">
-                All steps complete — mark cook done on detail screen.
+              <Text className="text-muted-foreground text-[12px] font-medium italic">
+                All steps complete.
               </Text>
             )}
           </View>

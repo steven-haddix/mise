@@ -43,9 +43,9 @@ export default function CooksScreen() {
 
   return (
     <Screen edges={["top"]}>
-      <View className="px-5 pt-3 pb-2">
-        <Text className="text-foreground text-3xl font-bold">{getGreeting()}</Text>
-        <Text className="text-muted-foreground text-sm mt-1">{subtitle}</Text>
+      <View className="px-6 pt-6 pb-2">
+        <Text className="text-foreground text-[34px] font-bold tracking-tight">{getGreeting()}</Text>
+        <Text className="text-muted-foreground text-[14px] font-medium mt-1 uppercase tracking-wider opacity-80">{subtitle}</Text>
       </View>
 
       <FlatList
@@ -56,7 +56,7 @@ export default function CooksScreen() {
             <CookCard cook={item} />
           </Pressable>
         )}
-        contentContainerStyle={{ padding: 16, paddingBottom: 120, gap: 12 }}
+        contentContainerStyle={{ padding: 24, paddingBottom: 140, gap: 16 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -65,7 +65,7 @@ export default function CooksScreen() {
           />
         }
         ListFooterComponent={
-          <View className={count === 0 ? "mt-20" : "mt-1"}>
+          <View className={count === 0 ? "mt-16" : "mt-2"}>
             <StartNewCookCard variant={count === 0 ? "prominent" : "compact"} />
           </View>
         }

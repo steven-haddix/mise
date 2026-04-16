@@ -82,30 +82,40 @@ export default function CookTimelineScreen() {
         onBack={() => router.back()}
         rightAction={
           cook.conversationId ? (
-            <Pressable
+            <Button 
+              isIconOnly 
+              variant="ghost" 
+              size="sm" 
               onPress={() => router.push(`/(tabs)/(chat)/${cook.conversationId}` as never)}
-              hitSlop={8}
-              className="w-10 h-10 items-center justify-center"
+              className="rounded-xl h-10 w-10 bg-card/40 border border-border/10"
             >
-              <MessageCircle size={22} color={tokens.primary} />
-            </Pressable>
+              <MessageCircle size={22} color={tokens.primary} strokeWidth={2.5} />
+            </Button>
           ) : undefined
         }
       />
 
-      <View className="items-center pb-4">
-        <Text className="text-muted-foreground text-sm">
-          Target: {new Date(cook.targetTime).toLocaleString()}
+      <View className="items-center py-6 border-b border-border/5">
+        <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest opacity-60">
+          Estimated Completion
         </Text>
-        <View className="w-[60%] h-1 bg-muted rounded-sm mt-2">
-          <View style={{ width: `${progress * 100}%` }} className="h-1 bg-success rounded-sm" />
+        <Text className="text-foreground text-[15px] font-bold mt-1">
+          {new Date(cook.targetTime).toLocaleString(undefined, {
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+          })}
+        </Text>
+        <View className="w-[120px] h-1.5 bg-muted rounded-full mt-4 overflow-hidden">
+          <View style={{ width: `${progress * 100}%` }} className="h-full bg-success rounded-full" />
         </View>
-        <Text className="text-muted-foreground text-xs mt-1">
-          {completedSteps} / {cook.steps.length} steps complete
+        <Text className="text-muted-foreground/60 text-[11px] font-bold mt-2 uppercase tracking-tighter">
+          {completedSteps} / {cook.steps.length} steps complete · {Math.round(progress * 100)}%
         </Text>
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
+      <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 120 }}>
         {cook.steps.map((step, index) => (
           <TimelineStep
             key={step.id}

@@ -7,32 +7,32 @@
 @source "./node_modules/heroui-native/lib";
 
 @theme {
-  --color-background: hsl(0, 0%, 4%);
+  --color-background: hsl(220, 15%, 8%);
   --color-foreground: hsl(0, 0%, 98.5%);
-  --color-card: hsl(0, 0%, 13%);
+  --color-card: hsl(220, 15%, 12%);
   --color-card-foreground: hsl(0, 0%, 98.5%);
-  --color-popover: hsl(0, 0%, 13%);
+  --color-popover: hsl(220, 15%, 12%);
   --color-popover-foreground: hsl(0, 0%, 98.5%);
-  --color-primary: hsl(270, 60%, 70%);
-  --color-primary-foreground: hsl(0, 0%, 100%);
-  --color-secondary: hsl(0, 0%, 22%);
+  --color-primary: hsl(25, 40%, 65%);
+  --color-primary-foreground: hsl(25, 100%, 5%);
+  --color-secondary: hsl(220, 10%, 22%);
   --color-secondary-foreground: hsl(0, 0%, 98.5%);
-  --color-muted: hsl(0, 0%, 22%);
-  --color-muted-foreground: hsl(0, 0%, 56%);
-  --color-accent: hsl(270, 60%, 70%);
+  --color-muted: hsl(220, 10%, 18%);
+  --color-muted-foreground: hsl(220, 5%, 65%);
+  --color-accent: hsl(25, 40%, 65%);
   --color-accent-foreground: hsl(0, 0%, 100%);
-  --color-success: hsl(142, 70%, 45%);
-  --color-success-foreground: hsl(142, 70%, 98.5%);
+  --color-success: hsl(120, 15%, 45%);
+  --color-success-foreground: hsl(120, 70%, 98.5%);
   --color-warning: hsl(48, 96%, 53%);
   --color-warning-foreground: hsl(0, 0%, 4%);
   --color-danger: hsl(0, 84%, 60%);
   --color-danger-foreground: hsl(0, 0%, 98.5%);
-  --color-border: hsl(0, 0%, 18%);
-  --color-input: hsl(0, 0%, 18%);
-  --color-ring: hsl(270, 60%, 70%);
+  --color-border: hsl(220, 10%, 18%);
+  --color-input: hsl(220, 10%, 18%);
+  --color-ring: hsl(25, 40%, 65%);
 
-  --color-primary-muted: hsl(270, 30%, 18%);
-  --color-success-muted: hsl(142, 30%, 18%);
+  --color-primary-muted: hsl(25, 20%, 18%);
+  --color-success-muted: hsl(120, 20%, 18%);
   --color-warning-muted: hsl(48, 40%, 20%);
   --color-danger-muted: hsl(0, 40%, 20%);
 }
