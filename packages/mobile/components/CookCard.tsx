@@ -1,8 +1,8 @@
 import { View, Text } from "react-native";
 import { Card, Chip } from "heroui-native";
 import type { CookWithSteps } from "@mise/shared";
-import { emojiForCookTitle } from "../lib/emoji-map";
 import { computeDayOfCook, formatStartDate, formatTimeUntil } from "../lib/time-format";
+import { Display, Eyebrow } from "./ui";
 
 interface CookCardProps {
   cook: CookWithSteps;
@@ -19,65 +19,75 @@ export function CookCard({ cook }: CookCardProps) {
   const stepDates = cook.steps.map((s) => new Date(s.scheduledAt));
   const dayInfo = computeDayOfCook(stepDates, now);
   const firstStepDate = stepDates.length > 0 ? stepDates[0] : null;
-  const emoji = emojiForCookTitle(cook.title);
-
-  const subtitleLeft = dayInfo.label;
-  const subtitleRight = firstStepDate ? `Started ${formatStartDate(firstStepDate)}` : "";
 
   return (
-    <Card className="rounded-xl border-l-[3px] border-l-success bg-card shadow-none">
-      <Card.Body className="p-3.5">
-        <View className="flex-row items-center justify-between">
-          <Text className="text-foreground text-[16px] font-bold flex-1">
-            {emoji} {cook.title}
-          </Text>
-          {isActive && (
-            <Chip size="sm" color="success" variant="soft" className="rounded-md h-5 px-1.5 border-success/30">
-              <Chip.Label className="text-[9px] font-bold tracking-wider uppercase">Active</Chip.Label>
+    <Card className="rounded-2xl border border-[#E4DBC9] bg-card shadow-none">
+      <Card.Body className="p-5">
+        <View className="flex-row items-start justify-between">
+          <View className="flex-1 pr-3">
+            <Eyebrow color="ink-tertiary">{dayInfo.label}</Eyebrow>
+            <Display size="sm" italic className="mt-1">
+              {cook.title}
+            </Display>
+            {firstStepDate && (
+              <Text
+                className="text-[#6B635A] text-[13px] mt-1"
+                style={{ fontFamily: "Geist_400Regular" }}
+              >
+                Started {formatStartDate(firstStepDate)}
+              </Text>
+            )}
+          </View>
+          {isActive ? (
+            <Chip size="sm" color="success" variant="soft" className="rounded-md h-6 px-2 bg-[#DDE5D2] border-0">
+              <Chip.Label className="text-[11px] text-[#2F3D2A]">Active</Chip.Label>
+            </Chip>
+          ) : (
+            <Chip size="sm" variant="soft" className="rounded-md h-6 px-2 bg-[#EDE5D3] border-0">
+              <Chip.Label className="text-[11px] text-[#9E9488]">
+                {cook.status === "completed" ? "Complete" : "Cancelled"}
+              </Chip.Label>
             </Chip>
           )}
         </View>
 
-        <Text className="text-muted-foreground text-[12px] font-medium mt-0.5">
-          {subtitleLeft}
-          {subtitleRight ? ` · ${subtitleRight}` : ""}
-        </Text>
-
         {total > 0 && (
-          <View className="mt-3">
-            <View className="flex-row items-center gap-3">
-              <View className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
-                <View
-                  style={{ width: `${Math.round(progress * 100)}%` }}
-                  className="h-full bg-success rounded-full"
-                />
-              </View>
-              <Text className="text-muted-foreground text-[11px] font-bold text-right min-w-[34px]">
-                {Math.round(progress * 100)}%
-              </Text>
+          <View className="mt-4">
+            <View className="h-[2px] bg-[#EDE5D3] rounded-full overflow-hidden">
+              <View
+                style={{ width: `${Math.round(progress * 100)}%` }}
+                className="h-full bg-accent rounded-full"
+              />
             </View>
+            <Text
+              className="text-[#9E9488] text-[11px] mt-2"
+              style={{ fontFamily: "IBMPlexMono_400Regular" }}
+            >
+              {completedSteps} / {total} · {Math.round(progress * 100)}%
+            </Text>
           </View>
         )}
 
-        {isActive && (
-          <View className="mt-3 bg-background/50 rounded-lg p-2.5 border border-border/10">
-            {nextStep ? (
-              <View className="flex-row items-center justify-between">
-                <View className="flex-1">
-                  <Text className="text-muted-foreground text-[9px] font-bold uppercase tracking-widest">Next</Text>
-                  <Text className="text-foreground text-[14px] font-semibold mt-0.5" numberOfLines={1}>
-                    {nextStep.title}
-                  </Text>
-                </View>
-                <Text className="text-success text-[12px] font-bold ml-2">
-                  {formatTimeUntil(new Date(nextStep.scheduledAt), now)}
+        {isActive && nextStep && (
+          <View className="mt-4 bg-[#FBF6EC] border border-[#EDE5D3] rounded-xl p-3">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1 pr-3">
+                <Eyebrow color="ink-tertiary">Next</Eyebrow>
+                <Text
+                  className="text-foreground text-[15px] mt-1"
+                  style={{ fontFamily: "Newsreader_400Regular_Italic" }}
+                  numberOfLines={1}
+                >
+                  {nextStep.title}
                 </Text>
               </View>
-            ) : (
-              <Text className="text-muted-foreground text-[12px] font-medium italic">
-                All steps complete.
+              <Text
+                className="text-accent text-[13px]"
+                style={{ fontFamily: "IBMPlexMono_500Medium" }}
+              >
+                {formatTimeUntil(new Date(nextStep.scheduledAt), now)}
               </Text>
-            )}
+            </View>
           </View>
         )}
       </Card.Body>
