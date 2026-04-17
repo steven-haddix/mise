@@ -144,3 +144,17 @@ function addDays(d: Date, n: number): Date {
 function weekdayShort(d: Date): string {
   return d.toLocaleDateString(undefined, { weekday: "short" });
 }
+
+/**
+ * Formats a seconds duration for the live countdown on HappeningNowCard.
+ * `mm:ss` below an hour, `HH:MM:SS` at or above an hour. Negative clamps to 00:00.
+ */
+export function formatCountdown(seconds: number): string {
+  const s = Math.max(0, Math.floor(seconds));
+  const hh = Math.floor(s / 3600);
+  const mm = Math.floor((s % 3600) / 60);
+  const ss = s % 60;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  if (hh > 0) return `${pad(hh)}:${pad(mm)}:${pad(ss)}`;
+  return `${pad(mm)}:${pad(ss)}`;
+}
