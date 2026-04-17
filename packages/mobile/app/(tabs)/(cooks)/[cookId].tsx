@@ -1,12 +1,29 @@
-import { useState, useEffect } from "react";
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { useState, useEffect, useMemo } from "react";
+import { View, ScrollView } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { MessageCircle } from "lucide-react-native";
+import { MessageCircle, Check } from "lucide-react-native";
 import { Button, Spinner, Dialog } from "heroui-native";
 import { getCook, updateStep, updateCook } from "../../../lib/api";
-import { TimelineStep } from "../../../components/TimelineStep";
-import { Screen, AppHeader, tokens } from "../../../components/ui";
-import type { CookWithSteps } from "@mise/shared";
+import { HappeningNowCard } from "../../../components/HappeningNowCard";
+import {
+  Screen,
+  AppHeader,
+  CookMeta,
+  Timeline,
+  type TimelineItem,
+  type StepStatus,
+  Display,
+  tokens,
+} from "../../../components/ui";
+import { computeDayOfCook, formatClock, formatStepTimestamps } from "../../../lib/time-format";
+import type { CookWithSteps, CookStep } from "@mise/shared";
+
+function mapStatus(step: CookStep, now: Date): StepStatus {
+  if (step.status === "completed") return "done";
+  const due = new Date(step.scheduledAt) <= now;
+  if (step.status === "notified" || (step.status === "pending" && due)) return "active";
+  return "upcoming";
+}
 
 export default function CookTimelineScreen() {
   const { cookId } = useLocalSearchParams<{ cookId: string }>();
@@ -47,10 +64,52 @@ export default function CookTimelineScreen() {
     }
   };
 
+  const now = new Date();
+
+  const timelineItems: TimelineItem[] = useMemo(() => {
+    if (!cook) return [];
+    const dates = cook.steps.map((s) => new Date(s.scheduledAt));
+    const stamps = formatStepTimestamps(dates, now);
+    return cook.steps.map((step, i) => {
+      const stamp = stamps[i];
+      const status = mapStatus(step, now);
+      const [time, meridiem] = (stamp?.time ?? formatClock(dates[i])).split(" ");
+      return {
+        id: step.id,
+        time,
+        meridiem,
+        title: step.title,
+        description: step.description || undefined,
+        dayLabel: stamp?.dayLabel ?? null,
+        status,
+        expanded:
+          status === "active" ? (
+            <Button
+              variant="primary"
+              size="sm"
+              onPress={() => handleMarkComplete(step.id)}
+              className="self-start rounded-lg h-9 bg-accent"
+            >
+              <Check size={14} color={tokens.accentForeground} strokeWidth={2.5} />
+              <Button.Label className="text-white font-semibold ml-1">Mark done</Button.Label>
+            </Button>
+          ) : undefined,
+      };
+    });
+  }, [cook, now]);
+
+  const live = useMemo(() => {
+    if (!cook) return null;
+    const step =
+      cook.steps.find((s) => s.status === "notified") ??
+      cook.steps.find((s) => s.status === "pending" && new Date(s.scheduledAt) <= now);
+    return step ?? null;
+  }, [cook, now]);
+
   if (loading) {
     return (
       <View className="flex-1 bg-background items-center justify-center">
-        <Spinner color={tokens.primary} />
+        <Spinner color={tokens.accent} />
       </View>
     );
   }
@@ -60,11 +119,12 @@ export default function CookTimelineScreen() {
       <Screen>
         <AppHeader onBack={() => router.back()} />
         <View className="flex-1 items-center justify-center p-6">
-          <Text className="text-4xl mb-3">🍳</Text>
-          <Text className="text-muted-foreground text-base text-center">
-            This cook was removed.
-          </Text>
-          <Button variant="secondary" onPress={() => router.back()} className="mt-4">
+          <Display size="sm" italic>This cook was removed.</Display>
+          <Button
+            variant="secondary"
+            onPress={() => router.back()}
+            className="mt-4 rounded-xl"
+          >
             <Button.Label>Back</Button.Label>
           </Button>
         </View>
@@ -73,78 +133,103 @@ export default function CookTimelineScreen() {
   }
 
   const completedSteps = cook.steps.filter((s) => s.status === "completed").length;
-  const progress = cook.steps.length > 0 ? completedSteps / cook.steps.length : 0;
+  const total = cook.steps.length;
+  const progress = total > 0 ? completedSteps / total : 0;
+  const dayInfo = computeDayOfCook(cook.steps.map((s) => new Date(s.scheduledAt)), now);
+  const startedAt = cook.steps[0] ? new Date(cook.steps[0].scheduledAt) : null;
+  const targetAt = new Date(cook.targetTime);
 
   return (
     <Screen>
       <AppHeader
+        eyebrow={dayInfo.y > 1 ? `COOK · DAY ${dayInfo.x} OF ${dayInfo.y}` : "COOK"}
         title={cook.title}
+        italic
         onBack={() => router.back()}
         rightAction={
           cook.conversationId ? (
-            <Button 
-              isIconOnly 
-              variant="ghost" 
-              size="sm" 
-              onPress={() => router.push(`/(tabs)/(chat)/${cook.conversationId}` as never)}
-              className="rounded-xl h-10 w-10 bg-card/40 border border-border/10"
+            <Button
+              isIconOnly
+              variant="ghost"
+              size="sm"
+              onPress={() =>
+                router.push(`/(tabs)/(chat)/${cook.conversationId}` as never)
+              }
+              className="rounded-full h-9 w-9 bg-transparent border border-[#E4DBC9]"
             >
-              <MessageCircle size={22} color={tokens.primary} strokeWidth={2.5} />
+              <MessageCircle size={18} color={tokens.accent} strokeWidth={2.2} />
             </Button>
           ) : undefined
         }
       />
 
-      <View className="items-center py-6 border-b border-border/5">
-        <Text className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest opacity-60">
-          Estimated Completion
-        </Text>
-        <Text className="text-foreground text-[15px] font-bold mt-1">
-          {new Date(cook.targetTime).toLocaleString(undefined, {
-            month: "short",
-            day: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-          })}
-        </Text>
-        <View className="w-[120px] h-1.5 bg-muted rounded-full mt-4 overflow-hidden">
-          <View style={{ width: `${progress * 100}%` }} className="h-full bg-success rounded-full" />
-        </View>
-        <Text className="text-muted-foreground/60 text-[11px] font-bold mt-2 uppercase tracking-tighter">
-          {completedSteps} / {cook.steps.length} steps complete · {Math.round(progress * 100)}%
-        </Text>
-      </View>
+      <CookMeta
+        columns={[
+          {
+            label: "TARGET",
+            value: targetAt.toLocaleString(undefined, {
+              month: "short",
+              day: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+            }),
+          },
+          { label: "STEPS", value: `${total}` },
+          {
+            label: "STARTED",
+            value: startedAt
+              ? startedAt.toLocaleDateString(undefined, { month: "short", day: "numeric" })
+              : "—",
+          },
+        ]}
+        progress={progress}
+        progressLabel={`${completedSteps} / ${total} · ${Math.round(progress * 100)}%`}
+      />
 
-      <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 120 }}>
-        {cook.steps.map((step, index) => (
-          <TimelineStep
-            key={step.id}
-            step={step}
-            isLast={index === cook.steps.length - 1}
-            onMarkComplete={() => handleMarkComplete(step.id)}
-          />
-        ))}
+      <ScrollView contentContainerStyle={{ paddingTop: 16, paddingBottom: 140 }}>
+        {live && (
+          <View className="px-6 mb-6">
+            <HappeningNowCard
+              stepTitle={live.title}
+              cookSubtitle={cook.title}
+              targetAt={new Date(live.scheduledAt)}
+              onMarkComplete={() => handleMarkComplete(live.id)}
+            />
+          </View>
+        )}
+
+        <Timeline steps={timelineItems} />
+
         {cook.status !== "cancelled" && cook.status !== "completed" && (
-          <Button variant="danger-soft" onPress={() => setCancelOpen(true)} className="mt-6">
-            <Button.Label>Cancel cook</Button.Label>
-          </Button>
+          <View className="px-6 mt-8">
+            <Button
+              variant="ghost"
+              onPress={() => setCancelOpen(true)}
+              className="self-center"
+            >
+              <Button.Label className="text-danger">Cancel cook</Button.Label>
+            </Button>
+          </View>
         )}
       </ScrollView>
 
       <Dialog isOpen={cancelOpen} onOpenChange={setCancelOpen}>
         <Dialog.Portal>
           <Dialog.Overlay />
-          <Dialog.Content>
-            <Dialog.Title className="text-foreground text-lg font-bold">Cancel cook?</Dialog.Title>
-            <Dialog.Description className="text-muted-foreground text-sm leading-5">
+          <Dialog.Content className="bg-card rounded-2xl">
+            <Display size="sm" italic>Cancel cook?</Display>
+            <Dialog.Description
+              className="text-[#6B635A] text-[14px] leading-5 mt-2"
+              style={{ fontFamily: "Geist_400Regular" }}
+            >
               This will stop reminders and remove it from Home. You can't undo this.
             </Dialog.Description>
             <View className="flex-row gap-2.5 mt-4">
-              <Button variant="tertiary" onPress={() => setCancelOpen(false)} className="flex-1">
+              <Button variant="tertiary" onPress={() => setCancelOpen(false)} className="flex-1 rounded-xl h-11">
                 <Button.Label>Keep cooking</Button.Label>
               </Button>
-              <Button variant="danger" onPress={handleCancel} className="flex-1">
-                <Button.Label>Cancel cook</Button.Label>
+              <Button variant="danger" onPress={handleCancel} className="flex-1 rounded-xl h-11">
+                <Button.Label className="text-white">Cancel cook</Button.Label>
               </Button>
             </View>
           </Dialog.Content>
