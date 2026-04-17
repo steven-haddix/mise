@@ -19,10 +19,7 @@ describe("formatStepTimestamps", () => {
   });
 
   it("uses short weekday for days beyond tomorrow", () => {
-    const dates = [
-      new Date("2026-04-16T08:00:00"),
-      new Date("2026-04-17T09:00:00"),
-    ];
+    const dates = [new Date("2026-04-16T08:00:00"), new Date("2026-04-17T09:00:00")];
     const stamps = formatStepTimestamps(dates, now);
     expect(stamps[0]?.dayLabel).toBe("THU");
     expect(stamps[1]?.dayLabel).toBe("FRI");

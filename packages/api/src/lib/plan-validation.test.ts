@@ -13,8 +13,16 @@ describe("validatePlan", () => {
         title: "Sourdough",
         targetTime: tomorrow.toISOString(),
         steps: [
-          { title: "Feed starter", description: "x", scheduledAt: new Date("2026-04-12T20:00:00Z").toISOString() },
-          { title: "Mix", description: "y", scheduledAt: new Date("2026-04-13T08:00:00Z").toISOString() },
+          {
+            title: "Feed starter",
+            description: "x",
+            scheduledAt: new Date("2026-04-12T20:00:00Z").toISOString(),
+          },
+          {
+            title: "Mix",
+            description: "y",
+            scheduledAt: new Date("2026-04-13T08:00:00Z").toISOString(),
+          },
         ],
       },
       now,
@@ -28,7 +36,13 @@ describe("validatePlan", () => {
       {
         title: "Past cook",
         targetTime: yesterday.toISOString(),
-        steps: [{ title: "A", description: "x", scheduledAt: new Date("2026-04-10T12:00:00Z").toISOString() }],
+        steps: [
+          {
+            title: "A",
+            description: "x",
+            scheduledAt: new Date("2026-04-10T12:00:00Z").toISOString(),
+          },
+        ],
       },
       now,
     );
@@ -50,7 +64,13 @@ describe("validatePlan", () => {
       {
         title: "x",
         targetTime: tomorrow.toISOString(),
-        steps: [{ title: "  ", description: "x", scheduledAt: new Date("2026-04-12T20:00:00Z").toISOString() }],
+        steps: [
+          {
+            title: "  ",
+            description: "x",
+            scheduledAt: new Date("2026-04-12T20:00:00Z").toISOString(),
+          },
+        ],
       },
       now,
     );
@@ -63,7 +83,13 @@ describe("validatePlan", () => {
       {
         title: "x",
         targetTime: tomorrow.toISOString(),
-        steps: [{ title: "t", description: "", scheduledAt: new Date("2026-04-12T20:00:00Z").toISOString() }],
+        steps: [
+          {
+            title: "t",
+            description: "",
+            scheduledAt: new Date("2026-04-12T20:00:00Z").toISOString(),
+          },
+        ],
       },
       now,
     );
@@ -77,8 +103,16 @@ describe("validatePlan", () => {
         title: "x",
         targetTime: dayAfter.toISOString(),
         steps: [
-          { title: "a", description: "x", scheduledAt: new Date("2026-04-13T08:00:00Z").toISOString() },
-          { title: "b", description: "x", scheduledAt: new Date("2026-04-12T20:00:00Z").toISOString() },
+          {
+            title: "a",
+            description: "x",
+            scheduledAt: new Date("2026-04-13T08:00:00Z").toISOString(),
+          },
+          {
+            title: "b",
+            description: "x",
+            scheduledAt: new Date("2026-04-12T20:00:00Z").toISOString(),
+          },
         ],
       },
       now,
@@ -93,7 +127,11 @@ describe("validatePlan", () => {
         title: "x",
         targetTime: tomorrow.toISOString(),
         steps: [
-          { title: "a", description: "x", scheduledAt: new Date("2026-04-14T00:00:00Z").toISOString() },
+          {
+            title: "a",
+            description: "x",
+            scheduledAt: new Date("2026-04-14T00:00:00Z").toISOString(),
+          },
         ],
       },
       now,
@@ -124,7 +162,13 @@ describe("validatePlan", () => {
       {
         title: "x",
         targetTime: "not-a-date",
-        steps: [{ title: "a", description: "x", scheduledAt: new Date("2026-04-12T20:00:00Z").toISOString() }],
+        steps: [
+          {
+            title: "a",
+            description: "x",
+            scheduledAt: new Date("2026-04-12T20:00:00Z").toISOString(),
+          },
+        ],
       },
       now,
     );
@@ -138,7 +182,11 @@ describe("validatePlan", () => {
         title: "Sourdough",
         targetTime: tomorrow.toISOString(),
         steps: [
-          { title: "Mix", description: "x", scheduledAt: new Date("2026-04-12T14:00:00Z").toISOString() },
+          {
+            title: "Mix",
+            description: "x",
+            scheduledAt: new Date("2026-04-12T14:00:00Z").toISOString(),
+          },
           {
             title: "Overnight Bulk Ferment",
             description: "y",

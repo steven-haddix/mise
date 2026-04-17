@@ -18,12 +18,7 @@ export async function startNotificationPoller() {
         })
         .from(cookSteps)
         .innerJoin(cooks, eq(cookSteps.cookId, cooks.id))
-        .where(
-          and(
-            eq(cookSteps.status, "pending"),
-            lte(cookSteps.scheduledAt, new Date()),
-          ),
-        );
+        .where(and(eq(cookSteps.status, "pending"), lte(cookSteps.scheduledAt, new Date())));
 
       if (dueSteps.length === 0) return;
 
@@ -31,10 +26,7 @@ export async function startNotificationPoller() {
 
       for (const { step, cook } of dueSteps) {
         // Get user's push tokens
-        const tokens = await db
-          .select()
-          .from(pushTokens)
-          .where(eq(pushTokens.userId, cook.userId));
+        const tokens = await db.select().from(pushTokens).where(eq(pushTokens.userId, cook.userId));
 
         if (tokens.length > 0) {
           await sendPushNotifications(

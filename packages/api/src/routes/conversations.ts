@@ -13,10 +13,7 @@ conversationsRoutes.use("/*", requireAuth);
 conversationsRoutes.post("/conversations", async (c) => {
   const user = c.get("user") as { id: string };
 
-  const [convo] = await db
-    .insert(conversations)
-    .values({ userId: user.id })
-    .returning();
+  const [convo] = await db.insert(conversations).values({ userId: user.id }).returning();
 
   const [greeting] = await db
     .insert(messages)
@@ -36,7 +33,10 @@ conversationsRoutes.patch("/conversations/:conversationId/messages/:messageId", 
   const user = c.get("user") as { id: string };
   const conversationId = c.req.param("conversationId");
   const messageId = c.req.param("messageId");
-  const body = await c.req.json<{ proposalState: "confirmed" | "superseded"; createdCookId?: string }>();
+  const body = await c.req.json<{
+    proposalState: "confirmed" | "superseded";
+    createdCookId?: string;
+  }>();
 
   if (body.proposalState !== "confirmed" && body.proposalState !== "superseded") {
     return c.json({ error: "Invalid proposalState" }, 400);

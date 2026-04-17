@@ -8,7 +8,7 @@ import {
   requestPermissionAndRegister,
   type PermissionState,
 } from "../../../lib/push-permissions";
-import { Screen, AppHeader, ListRow, tokens } from "../../../components/ui";
+import { Screen, AppHeader, ListRow, Display, Eyebrow, tokens } from "../../../components/ui";
 
 export default function ProfileScreen() {
   const { data: session } = authClient.useSession();
@@ -42,39 +42,57 @@ export default function ProfileScreen() {
 
   return (
     <Screen edges={["top"]}>
-      <AppHeader title="Profile" />
+      <AppHeader eyebrow="SETTINGS" title="Profile" italic />
 
-      <View className="p-4 gap-6">
-        <Card>
-          <Card.Body>
-            <Text className="text-foreground text-lg font-semibold">
+      <View className="p-6 gap-5">
+        <Card className="rounded-2xl border border-[#E4DBC9] bg-card">
+          <Card.Body className="p-5">
+            <Display size="sm" italic>
               {session?.user?.name || "User"}
+            </Display>
+            <Text
+              className="text-[#6B635A] text-[13px] mt-1"
+              style={{ fontFamily: "Geist_400Regular" }}
+            >
+              {session?.user?.email}
             </Text>
-            <Text className="text-muted-foreground text-sm mt-1">{session?.user?.email}</Text>
           </Card.Body>
         </Card>
 
-        <ListRow
-          icon={<Bell size={18} color={tokens.primary} />}
-          title="Step reminders"
-          value={notifValue}
-          onPress={handleNotificationsTap}
-        />
+        <View>
+          <Eyebrow color="ink-tertiary">NOTIFICATIONS</Eyebrow>
+          <View className="mt-2">
+            <ListRow
+              icon={<Bell size={18} color={tokens.accent} strokeWidth={2} />}
+              title="Step reminders"
+              value={notifValue}
+              onPress={handleNotificationsTap}
+            />
+          </View>
+        </View>
 
-        <Card>
-          <Card.Body>
-            <Text className="text-foreground text-base font-semibold">About Mise</Text>
-            <Text className="text-muted-foreground text-sm mt-2 leading-5">
+        <Card className="rounded-2xl border border-[#E4DBC9] bg-card">
+          <Card.Body className="p-5">
+            <Eyebrow color="ink-tertiary">ABOUT</Eyebrow>
+            <Text
+              className="text-foreground text-[14px] mt-3 leading-5"
+              style={{ fontFamily: "Geist_400Regular" }}
+            >
               Your warm cooking companion. Tell Mise what you want to cook and when — we'll build
               the timing plan.
             </Text>
-            <Text className="text-muted-foreground text-xs mt-2 opacity-60">v1.0.0</Text>
+            <Text
+              className="text-[#9E9488] text-[11px] mt-3"
+              style={{ fontFamily: "IBMPlexMono_400Regular" }}
+            >
+              v1.0.0
+            </Text>
           </Card.Body>
         </Card>
 
         <ListRow
-          icon={<LogOut size={18} color={tokens.danger} />}
-          title="Sign Out"
+          icon={<LogOut size={18} color={tokens.danger} strokeWidth={2} />}
+          title="Sign out"
           destructive
           onPress={handleSignOut}
         />

@@ -1,4 +1,14 @@
-import { pgTable, uuid, text, timestamp, integer, jsonb, pgEnum, index, uniqueIndex } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  uuid,
+  text,
+  timestamp,
+  integer,
+  jsonb,
+  pgEnum,
+  index,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // ── Enums ──────────────────────────────────────────────────────────────────
@@ -58,8 +68,12 @@ export const accounts = pgTable("accounts", {
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
   idToken: text("id_token"),
-  accessTokenExpiresAt: timestamp("access_token_expires_at", { withTimezone: true }),
-  refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { withTimezone: true }),
+  accessTokenExpiresAt: timestamp("access_token_expires_at", {
+    withTimezone: true,
+  }),
+  refreshTokenExpiresAt: timestamp("refresh_token_expires_at", {
+    withTimezone: true,
+  }),
   scope: text("scope"),
   password: text("password"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -183,7 +197,10 @@ export const pushTokens = pgTable(
 
 export const conversationsRelations = relations(conversations, ({ many, one }) => ({
   messages: many(messages),
-  cook: one(cooks, { fields: [conversations.cookId], references: [cooks.id] }),
+  cook: one(cooks, {
+    fields: [conversations.cookId],
+    references: [cooks.id],
+  }),
 }));
 
 export const messagesRelations = relations(messages, ({ one }) => ({

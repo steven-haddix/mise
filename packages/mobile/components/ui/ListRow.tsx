@@ -11,20 +11,27 @@ interface ListRowProps {
 }
 
 export function ListRow({ icon, title, value, onPress, destructive, rightElement }: ListRowProps) {
-  const titleClass = destructive ? "text-danger" : "text-foreground";
+  const titleColor = destructive ? "text-danger" : "text-foreground";
   const content = (
-    <View className="flex-row items-center gap-3 bg-card rounded-xl p-4">
+    <View className="flex-row items-center gap-3 bg-card border border-[#E4DBC9] rounded-xl px-4 py-4">
       {icon && <View>{icon}</View>}
       <View className="flex-1">
-        <Text className={`${titleClass} text-base`}>{title}</Text>
+        <Text className={`${titleColor} text-[15px]`} style={{ fontFamily: "Geist_500Medium" }}>
+          {title}
+        </Text>
       </View>
       {rightElement ??
-        (value ? <Text className="text-muted-foreground text-sm">{value}</Text> : null)}
+        (value ? (
+          <Text
+            className="text-[#9E9488] text-[14px]"
+            style={{ fontFamily: "Newsreader_400Regular_Italic" }}
+          >
+            {value}
+          </Text>
+        ) : null)}
     </View>
   );
 
-  if (onPress) {
-    return <Pressable onPress={onPress}>{content}</Pressable>;
-  }
+  if (onPress) return <Pressable onPress={onPress}>{content}</Pressable>;
   return content;
 }

@@ -8,14 +8,11 @@ function TabBarBackground() {
   if (Platform.OS === "android") {
     return (
       <View style={[StyleSheet.absoluteFill, styles.androidTabBarBg]}>
-        <BlurView intensity={100} tint="dark" style={StyleSheet.absoluteFill} />
+        <BlurView intensity={100} tint="light" style={StyleSheet.absoluteFill} />
       </View>
     );
   }
-
-  return (
-    <BlurView intensity={80} tint="dark" style={StyleSheet.absoluteFill} />
-  );
+  return <BlurView intensity={80} tint="light" style={StyleSheet.absoluteFill} />;
 }
 
 const styles = StyleSheet.create({
@@ -41,11 +38,11 @@ export default function TabsLayout() {
             height: Platform.OS === "ios" ? 88 : 64,
           },
           tabBarBackground: () => <TabBarBackground />,
-          tabBarActiveTintColor: tokens.primary,
-          tabBarInactiveTintColor: tokens.mutedForeground,
+          tabBarActiveTintColor: tokens.accent,
+          tabBarInactiveTintColor: tokens.inkTertiary,
           tabBarLabelStyle: {
+            fontFamily: "Geist_500Medium",
             fontSize: 11,
-            fontWeight: "bold",
             marginTop: -4,
             marginBottom: Platform.OS === "ios" ? 0 : 4,
           },
@@ -55,21 +52,27 @@ export default function TabsLayout() {
           name="(cooks)"
           options={{
             title: "Home",
-            tabBarIcon: ({ color, size }) => <ChefHat size={size - 2} color={color} strokeWidth={2.5} />,
+            tabBarIcon: ({ color, size }) => (
+              <ChefHat size={size - 2} color={color} strokeWidth={2.2} />
+            ),
           }}
         />
         <Tabs.Screen
           name="(chat)"
           options={{
             title: "Chat",
-            tabBarIcon: ({ color, size }) => <MessageCircle size={size - 2} color={color} strokeWidth={2.5} />,
+            tabBarIcon: ({ color, size }) => (
+              <MessageCircle size={size - 2} color={color} strokeWidth={2.2} />
+            ),
           }}
         />
         <Tabs.Screen
           name="(profile)"
           options={{
             title: "Profile",
-            tabBarIcon: ({ color, size }) => <User size={size - 2} color={color} strokeWidth={2.5} />,
+            tabBarIcon: ({ color, size }) => (
+              <User size={size - 2} color={color} strokeWidth={2.2} />
+            ),
           }}
         />
       </Tabs>

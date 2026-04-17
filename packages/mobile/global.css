@@ -7,32 +7,56 @@
 @source "./node_modules/heroui-native/lib";
 
 @theme {
-  --color-background: hsl(220, 15%, 8%);
-  --color-foreground: hsl(0, 0%, 98.5%);
-  --color-card: hsl(220, 15%, 12%);
-  --color-card-foreground: hsl(0, 0%, 98.5%);
-  --color-popover: hsl(220, 15%, 12%);
-  --color-popover-foreground: hsl(0, 0%, 98.5%);
-  --color-primary: hsl(25, 40%, 65%);
-  --color-primary-foreground: hsl(25, 100%, 5%);
-  --color-secondary: hsl(220, 10%, 22%);
-  --color-secondary-foreground: hsl(0, 0%, 98.5%);
-  --color-muted: hsl(220, 10%, 18%);
-  --color-muted-foreground: hsl(220, 5%, 65%);
-  --color-accent: hsl(25, 40%, 65%);
-  --color-accent-foreground: hsl(0, 0%, 100%);
-  --color-success: hsl(120, 15%, 45%);
-  --color-success-foreground: hsl(120, 70%, 98.5%);
-  --color-warning: hsl(48, 96%, 53%);
-  --color-warning-foreground: hsl(0, 0%, 4%);
-  --color-danger: hsl(0, 84%, 60%);
-  --color-danger-foreground: hsl(0, 0%, 98.5%);
-  --color-border: hsl(220, 10%, 18%);
-  --color-input: hsl(220, 10%, 18%);
-  --color-ring: hsl(25, 40%, 65%);
+  /* Surfaces */
+  --color-background: #F4EDE1;        /* bg-base (cream) */
+  --color-foreground: #1A1612;        /* ink-primary */
+  --color-card: #FFFFFF;              /* bg-elevated */
+  --color-card-foreground: #1A1612;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #1A1612;
 
-  --color-primary-muted: hsl(25, 20%, 18%);
-  --color-success-muted: hsl(120, 20%, 18%);
-  --color-warning-muted: hsl(48, 40%, 20%);
-  --color-danger-muted: hsl(0, 40%, 20%);
+  /* Primary = dark olive "ink" used for the InkCard fill */
+  --color-primary: #2F3D2A;
+  --color-primary-foreground: #F4EDE1;
+  --color-primary-muted: #E4E6DA;     /* primary-wash */
+
+  /* Accent = saturated terracotta used for CTAs and active states */
+  --color-accent: #C55A31;
+  --color-accent-foreground: #FFFFFF;
+
+  /* Secondary / muted */
+  --color-secondary: #E4DBC9;         /* line */
+  --color-secondary-foreground: #1A1612;
+  --color-muted: #EDE5D3;              /* line-subtle */
+  --color-muted-foreground: #6B635A;  /* ink-secondary */
+
+  /* Semantics */
+  --color-success: #7B9268;           /* sage */
+  --color-success-foreground: #FFFFFF;
+  --color-success-muted: #DDE5D2;     /* sage-wash */
+  --color-warning: #C88A2E;            /* amber */
+  --color-warning-foreground: #1A1612;
+  --color-warning-muted: #F0DFC0;     /* amber-wash */
+  --color-danger: #9F3A32;             /* crimson */
+  --color-danger-foreground: #F4EDE1;
+  --color-danger-muted: #F3DDCC;      /* accent-wash */
+
+  /* Borders / rings / inputs */
+  --color-border: #E4DBC9;             /* line */
+  --color-input: #EDE5D3;              /* line-subtle */
+  --color-ring: #C55A31;               /* accent */
+
+  /* Editorial-specific extras (referenced by className="bg-*" directly) */
+  --color-surface: #FBF6EC;            /* bg-surface (notepad-cream) */
+  --color-ink-soft: #3C4B37;           /* bg-ink-soft */
+  --color-ink-tertiary: #9E9488;       /* ink-tertiary */
+  --color-ink-inverse-soft: #C9C4AE;   /* ink-inverse-soft */
+  --color-accent-soft: #E89970;        /* accent hover */
+  --color-accent-wash: #F3DDCC;        /* accent surface */
+  --color-sage-wash: #DDE5D2;
+
+  /* Font families */
+  --font-body: "Geist", system-ui, sans-serif;
+  --font-display: "Newsreader", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 }
