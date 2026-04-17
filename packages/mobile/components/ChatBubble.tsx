@@ -8,13 +8,19 @@ interface ChatBubbleProps {
 export function ChatBubble({ message }: ChatBubbleProps) {
   const isUser = message.role === "user";
   const alignClass = isUser ? "self-end" : "self-start";
-  const bubbleClass = isUser ? "bg-primary-muted border border-primary/20" : "bg-card";
-  const textClass = isUser ? "text-foreground" : "text-card-foreground";
+  const bubbleClass = isUser
+    ? "bg-[#F3DDCC]"
+    : "bg-card border border-[#EDE5D3]";
 
   return (
     <View className={`${alignClass} max-w-[85%] my-1.5`}>
-      <View className={`${bubbleClass} px-4 py-3 rounded-xl`}>
-        <Text className={`${textClass} text-[15px] leading-[22px]`}>{message.content}</Text>
+      <View className={`${bubbleClass} px-4 py-3 rounded-2xl`}>
+        <Text
+          className="text-foreground text-[15px] leading-[22px]"
+          style={{ fontFamily: "Geist_400Regular" }}
+        >
+          {message.content}
+        </Text>
       </View>
     </View>
   );
