@@ -29,7 +29,12 @@ import {
   DEFAULT_QUICK_START_CHIPS,
   type QuickStartChip,
 } from "../../../components/QuickStartChips";
-import { getGreeting, formatClock, splitClock } from "../../../lib/time-format";
+import {
+  getGreeting,
+  formatClock,
+  splitClock,
+  formatStepTimestamps,
+} from "../../../lib/time-format";
 import type { CookWithSteps, CookStep } from "@mise/shared";
 
 function todayEyebrow(now: Date, activeMultiDay?: { x: number; y: number } | null): string {
@@ -48,7 +53,7 @@ interface ScheduleEntry extends ScheduleItem {
   scheduledAt: Date;
 }
 
-function buildSchedule(cooks: CookWithSteps[], limit: number): ScheduleEntry[] {
+function buildSchedule(cooks: CookWithSteps[], now: Date, limit: number): ScheduleEntry[] {
   const flat: Array<{ cook: CookWithSteps; step: CookStep; scheduledAt: Date }> = [];
   for (const cook of cooks) {
     for (const step of cook.steps) {
@@ -58,6 +63,7 @@ function buildSchedule(cooks: CookWithSteps[], limit: number): ScheduleEntry[] {
   }
   flat.sort((a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime());
   const top = flat.slice(0, limit);
+  const stamps = formatStepTimestamps(top.map((t) => t.scheduledAt), now);
 
   return top.map(({ cook, step, scheduledAt }, i) => {
     const { time, meridiem } = splitClock(formatClock(scheduledAt));
@@ -72,6 +78,7 @@ function buildSchedule(cooks: CookWithSteps[], limit: number): ScheduleEntry[] {
       status,
       cookId: cook.id,
       scheduledAt,
+      dayLabel: stamps[i]?.dayLabel ?? null,
     };
   });
 }
@@ -122,7 +129,7 @@ export default function HomeScreen() {
 
   const now = new Date();
   const live = useMemo(() => findLiveStep(activeCooks, now), [activeCooks, now]);
-  const schedule = useMemo(() => buildSchedule(activeCooks, 5), [activeCooks]);
+  const schedule = useMemo(() => buildSchedule(activeCooks, now, 5), [activeCooks, now]);
   const activeCount = activeCooks.length;
 
   const startConversationFromPrompt = useCallback(
