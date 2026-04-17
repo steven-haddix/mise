@@ -8,10 +8,7 @@ interface InkCardProps extends ViewProps {
 
 export function InkCard({ children, className, ...rest }: InkCardProps) {
   return (
-    <View
-      {...rest}
-      className={`bg-primary rounded-2xl p-5 ${className ?? ""}`}
-    >
+    <View {...rest} className={`bg-primary rounded-2xl p-5 ${className ?? ""}`}>
       {children}
     </View>
   );

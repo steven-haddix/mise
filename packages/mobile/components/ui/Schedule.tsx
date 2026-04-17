@@ -22,18 +22,13 @@ export function Schedule({ steps, onSelect, limit = 5 }: ScheduleProps) {
   return (
     <View className="bg-card rounded-2xl border border-[#EDE5D3] overflow-hidden">
       {visible.map((step, i) => (
-        <View
-          key={step.id}
-          className={i > 0 ? "border-t border-[#EDE5D3]" : ""}
-        >
+        <View key={step.id} className={i > 0 ? "border-t border-[#EDE5D3]" : ""}>
           <StepRow
             time={step.time}
             meridiem={step.meridiem}
             title={step.title}
             subtitle={
-              step.durationLabel
-                ? `${step.cookName} · ${step.durationLabel}`
-                : step.cookName
+              step.durationLabel ? `${step.cookName} · ${step.durationLabel}` : step.cookName
             }
             status={step.status}
             onPress={onSelect ? () => onSelect(step) : undefined}

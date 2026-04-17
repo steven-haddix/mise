@@ -8,10 +8,10 @@ import { formatCountdown } from "../lib/time-format";
 interface HappeningNowCardProps {
   stepTitle: string;
   cookSubtitle?: string;
-  targetAt: Date;                 // when countdown reaches zero
+  targetAt: Date; // when countdown reaches zero
   onMarkComplete: () => void | Promise<void>;
   onSnooze?: () => void;
-  progress?: number;              // 0..1 — overall cook progress (optional)
+  progress?: number; // 0..1 — overall cook progress (optional)
   progressLabel?: string;
 }
 
@@ -37,9 +37,7 @@ export function HappeningNowCard({
   return (
     <InkCard>
       <View className="flex-row items-start justify-between">
-        <Eyebrow color="ink-inverse-soft">
-          {overdue ? "OVERDUE" : "HAPPENING NOW"}
-        </Eyebrow>
+        <Eyebrow color="ink-inverse-soft">{overdue ? "OVERDUE" : "HAPPENING NOW"}</Eyebrow>
         <Text
           className="text-[#F4EDE1] text-[22px]"
           style={{ fontFamily: "IBMPlexMono_500Medium" }}
@@ -87,9 +85,7 @@ export function HappeningNowCard({
           onPress={onMarkComplete}
           className="flex-1 rounded-xl h-12 bg-accent"
         >
-          <Button.Label className="text-white font-semibold">
-            Mark step complete
-          </Button.Label>
+          <Button.Label className="text-white font-semibold">Mark step complete</Button.Label>
         </Button>
         {onSnooze && (
           <Button

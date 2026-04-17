@@ -14,15 +14,8 @@ import {
   Newsreader_400Regular_Italic,
   Newsreader_600SemiBold_Italic,
 } from "@expo-google-fonts/newsreader";
-import {
-  Geist_400Regular,
-  Geist_500Medium,
-  Geist_700Bold,
-} from "@expo-google-fonts/geist";
-import {
-  IBMPlexMono_400Regular,
-  IBMPlexMono_500Medium,
-} from "@expo-google-fonts/ibm-plex-mono";
+import { Geist_400Regular, Geist_500Medium, Geist_700Bold } from "@expo-google-fonts/geist";
+import { IBMPlexMono_400Regular, IBMPlexMono_500Medium } from "@expo-google-fonts/ibm-plex-mono";
 import { authClient } from "../lib/auth";
 import { tokens } from "../components/ui/tokens";
 
@@ -87,11 +80,7 @@ function SessionGate() {
           contentStyle: { backgroundColor: tokens.background },
         }}
       >
-        {session ? (
-          <Stack.Screen name="(tabs)" />
-        ) : (
-          <Stack.Screen name="(auth)" />
-        )}
+        {session ? <Stack.Screen name="(tabs)" /> : <Stack.Screen name="(auth)" />}
       </Stack>
       {!session && <Redirect href="/(auth)/login" />}
     </>

@@ -38,12 +38,7 @@ export default function AllCooksScreen() {
 
   return (
     <Screen edges={["top"]}>
-      <AppHeader
-        eyebrow="YOUR COOKS"
-        title="All cooks"
-        italic
-        onBack={() => router.back()}
-      />
+      <AppHeader eyebrow="YOUR COOKS" title="All cooks" italic onBack={() => router.back()} />
 
       <FlatList
         data={sections}
@@ -67,11 +62,7 @@ export default function AllCooksScreen() {
         )}
         contentContainerStyle={{ paddingTop: 16, paddingBottom: 140 }}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={tokens.accent}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={tokens.accent} />
         }
       />
     </Screen>

@@ -4,7 +4,7 @@ import { View, Text, Pressable } from "react-native";
 export type StepStatus = "upcoming" | "next" | "active" | "done";
 
 interface StepRowProps {
-  time: string;      // "10:05"
+  time: string; // "10:05"
   meridiem?: string; // "AM" / "PM" — optional (stacked under time when present)
   title: string;
   subtitle?: string;
@@ -34,10 +34,7 @@ export function StepRow({
   const inner = (
     <View className="flex-row items-start py-4 px-6">
       <View className="w-[56px]">
-        <Text
-          className="text-foreground text-[18px]"
-          style={{ fontFamily: "Geist_500Medium" }}
-        >
+        <Text className="text-foreground text-[18px]" style={{ fontFamily: "Geist_500Medium" }}>
           {time}
         </Text>
         {meridiem && (

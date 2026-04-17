@@ -1,11 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import {
-  View,
-  type TextInput,
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { View, type TextInput, FlatList, KeyboardAvoidingView, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "heroui-native";
 import { Plus } from "lucide-react-native";
@@ -20,10 +14,7 @@ import {
   listConversations,
 } from "../../../lib/api";
 import { ChatBubble } from "../../../components/ChatBubble";
-import {
-  PlanPreviewCard,
-  type PlanPreviewData,
-} from "../../../components/PlanPreviewCard";
+import { PlanPreviewCard, type PlanPreviewData } from "../../../components/PlanPreviewCard";
 import { EnableNotificationsModal } from "../../../components/EnableNotificationsModal";
 import { ChatComposer } from "../../../components/ChatComposer";
 import {
@@ -216,8 +207,7 @@ export default function ChatScreen() {
             return {
               ...m,
               toolCalls: tc.map((entry: any) =>
-                entry?.toolName === "propose_plan" &&
-                entry.output?.proposalId === plan.proposalId
+                entry?.toolName === "propose_plan" && entry.output?.proposalId === plan.proposalId
                   ? {
                       ...entry,
                       output: {
@@ -305,9 +295,7 @@ export default function ChatScreen() {
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={{ padding: 24, paddingBottom: tabBarHeight + 100 }}
-          onContentSizeChange={() =>
-            flatListRef.current?.scrollToEnd({ animated: true })
-          }
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
           ListFooterComponent={
             isStreaming && streamingText ? (
               <ChatBubble

@@ -37,9 +37,7 @@ export function AppHeader({ title, eyebrow, italic, onBack, rightAction }: AppHe
             </Display>
           )}
         </View>
-        {rightAction && (
-          <View className="flex-row items-center gap-2 pt-1">{rightAction}</View>
-        )}
+        {rightAction && <View className="flex-row items-center gap-2 pt-1">{rightAction}</View>}
       </View>
     </View>
   );

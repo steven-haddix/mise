@@ -55,10 +55,7 @@ export function Timeline({ steps }: TimelineProps) {
               style={{ right: 29, top: 20, bottom: 20, width: 1 }}
             />
             {group.items.map((item, i) => (
-              <View
-                key={item.id}
-                className={i > 0 ? "border-t border-[#EDE5D3]" : ""}
-              >
+              <View key={item.id} className={i > 0 ? "border-t border-[#EDE5D3]" : ""}>
                 <StepRow
                   time={item.time}
                   meridiem={item.meridiem}

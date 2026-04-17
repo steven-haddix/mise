@@ -33,13 +33,7 @@ function parseDate(s: string): Date | null {
   return isNaN(d.getTime()) ? null : d;
 }
 
-export function PlanPreviewCard({
-  data,
-  pushPermission,
-  onBuild,
-  onViewCook,
-  buildError,
-}: Props) {
+export function PlanPreviewCard({ data, pushPermission, onBuild, onViewCook, buildError }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -107,12 +101,16 @@ export function PlanPreviewCard({
 
         <View className="gap-2 mt-3">
           {firstStepAt && (
-            <MetaRow icon={<Clock size={14} color={tokens.inkTertiary} strokeWidth={2} />}
-                     label={`Start: ${formatClock(firstStepAt)}`} />
+            <MetaRow
+              icon={<Clock size={14} color={tokens.inkTertiary} strokeWidth={2} />}
+              label={`Start: ${formatClock(firstStepAt)}`}
+            />
           )}
           {totalDurationSec > 0 && (
-            <MetaRow icon={<Timer size={14} color={tokens.inkTertiary} strokeWidth={2} />}
-                     label={`Total: ${formatTotalDuration(totalDurationSec)}`} />
+            <MetaRow
+              icon={<Timer size={14} color={tokens.inkTertiary} strokeWidth={2} />}
+              label={`Total: ${formatTotalDuration(totalDurationSec)}`}
+            />
           )}
           <ReminderRow state={pushPermission} />
         </View>
@@ -121,10 +119,7 @@ export function PlanPreviewCard({
           onPress={() => setExpanded((v) => !v)}
           className="flex-row items-center gap-1 mt-4"
         >
-          <Text
-            className="text-accent text-[13px]"
-            style={{ fontFamily: "Geist_500Medium" }}
-          >
+          <Text className="text-accent text-[13px]" style={{ fontFamily: "Geist_500Medium" }}>
             {expanded ? "Hide steps" : `Show ${data.steps.length} steps`}
           </Text>
           <ChevronDown
@@ -141,10 +136,7 @@ export function PlanPreviewCard({
         )}
 
         {buildError && (
-          <Text
-            className="text-danger text-[12px] mt-3"
-            style={{ fontFamily: "Geist_500Medium" }}
-          >
+          <Text className="text-danger text-[12px] mt-3" style={{ fontFamily: "Geist_500Medium" }}>
             {buildError}
           </Text>
         )}
@@ -177,7 +169,12 @@ export function PlanPreviewCard({
       {/* Status chip for non-active states — top-right floating */}
       {isConfirmed && (
         <View className="absolute top-3 right-4">
-          <Chip size="sm" color="success" variant="soft" className="rounded-md h-5 px-1.5 bg-[#DDE5D2] border-0">
+          <Chip
+            size="sm"
+            color="success"
+            variant="soft"
+            className="rounded-md h-5 px-1.5 bg-[#DDE5D2] border-0"
+          >
             <Chip.Label className="text-[9px] font-semibold text-[#2F3D2A] uppercase tracking-widest">
               Built
             </Chip.Label>
@@ -192,10 +189,7 @@ function MetaRow({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
     <View className="flex-row items-center gap-2">
       {icon}
-      <Text
-        className="text-foreground text-[14px]"
-        style={{ fontFamily: "Geist_500Medium" }}
-      >
+      <Text className="text-foreground text-[14px]" style={{ fontFamily: "Geist_500Medium" }}>
         {label}
       </Text>
     </View>
@@ -207,10 +201,7 @@ function ReminderRow({ state }: { state: PermissionState }) {
     return (
       <Pressable onPress={() => Linking.openSettings()} className="flex-row items-center gap-2">
         <AlertTriangle size={14} color={tokens.warning} strokeWidth={2} />
-        <Text
-          className="text-warning text-[14px]"
-          style={{ fontFamily: "Geist_500Medium" }}
-        >
+        <Text className="text-warning text-[14px]" style={{ fontFamily: "Geist_500Medium" }}>
           Enable reminders in settings
         </Text>
       </Pressable>
@@ -219,10 +210,7 @@ function ReminderRow({ state }: { state: PermissionState }) {
   return (
     <View className="flex-row items-center gap-2">
       <Bell size={14} color={tokens.inkTertiary} strokeWidth={2} />
-      <Text
-        className="text-foreground text-[14px]"
-        style={{ fontFamily: "Geist_500Medium" }}
-      >
+      <Text className="text-foreground text-[14px]" style={{ fontFamily: "Geist_500Medium" }}>
         With step reminders
       </Text>
     </View>

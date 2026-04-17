@@ -119,12 +119,10 @@ export default function CookTimelineScreen() {
       <Screen>
         <AppHeader onBack={() => router.back()} />
         <View className="flex-1 items-center justify-center p-6">
-          <Display size="sm" italic>This cook was removed.</Display>
-          <Button
-            variant="secondary"
-            onPress={() => router.back()}
-            className="mt-4 rounded-xl"
-          >
+          <Display size="sm" italic>
+            This cook was removed.
+          </Display>
+          <Button variant="secondary" onPress={() => router.back()} className="mt-4 rounded-xl">
             <Button.Label>Back</Button.Label>
           </Button>
         </View>
@@ -135,7 +133,10 @@ export default function CookTimelineScreen() {
   const completedSteps = cook.steps.filter((s) => s.status === "completed").length;
   const total = cook.steps.length;
   const progress = total > 0 ? completedSteps / total : 0;
-  const dayInfo = computeDayOfCook(cook.steps.map((s) => new Date(s.scheduledAt)), now);
+  const dayInfo = computeDayOfCook(
+    cook.steps.map((s) => new Date(s.scheduledAt)),
+    now,
+  );
   const startedAt = cook.steps[0] ? new Date(cook.steps[0].scheduledAt) : null;
   const targetAt = new Date(cook.targetTime);
 
@@ -152,9 +153,7 @@ export default function CookTimelineScreen() {
               isIconOnly
               variant="ghost"
               size="sm"
-              onPress={() =>
-                router.push(`/(tabs)/(chat)/${cook.conversationId}` as never)
-              }
+              onPress={() => router.push(`/(tabs)/(chat)/${cook.conversationId}` as never)}
               className="rounded-full h-9 w-9 bg-transparent border border-[#E4DBC9]"
             >
               <MessageCircle size={18} color={tokens.accent} strokeWidth={2.2} />
@@ -202,11 +201,7 @@ export default function CookTimelineScreen() {
 
         {cook.status !== "cancelled" && cook.status !== "completed" && (
           <View className="px-6 mt-8">
-            <Button
-              variant="ghost"
-              onPress={() => setCancelOpen(true)}
-              className="self-center"
-            >
+            <Button variant="ghost" onPress={() => setCancelOpen(true)} className="self-center">
               <Button.Label className="text-danger">Cancel cook</Button.Label>
             </Button>
           </View>
@@ -217,7 +212,9 @@ export default function CookTimelineScreen() {
         <Dialog.Portal>
           <Dialog.Overlay />
           <Dialog.Content className="bg-card rounded-2xl">
-            <Display size="sm" italic>Cancel cook?</Display>
+            <Display size="sm" italic>
+              Cancel cook?
+            </Display>
             <Dialog.Description
               className="text-[#6B635A] text-[14px] leading-5 mt-2"
               style={{ fontFamily: "Geist_400Regular" }}
@@ -225,7 +222,11 @@ export default function CookTimelineScreen() {
               This will stop reminders and remove it from Home. You can't undo this.
             </Dialog.Description>
             <View className="flex-row gap-2.5 mt-4">
-              <Button variant="tertiary" onPress={() => setCancelOpen(false)} className="flex-1 rounded-xl h-11">
+              <Button
+                variant="tertiary"
+                onPress={() => setCancelOpen(false)}
+                className="flex-1 rounded-xl h-11"
+              >
                 <Button.Label>Keep cooking</Button.Label>
               </Button>
               <Button variant="danger" onPress={handleCancel} className="flex-1 rounded-xl h-11">

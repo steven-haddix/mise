@@ -38,8 +38,7 @@ export default function ProfileScreen() {
     }
   };
 
-  const notifValue =
-    permission === "granted" ? "On" : permission === "denied" ? "Off" : "Not set";
+  const notifValue = permission === "granted" ? "On" : permission === "denied" ? "Off" : "Not set";
 
   return (
     <Screen edges={["top"]}>
@@ -79,8 +78,8 @@ export default function ProfileScreen() {
               className="text-foreground text-[14px] mt-3 leading-5"
               style={{ fontFamily: "Geist_400Regular" }}
             >
-              Your warm cooking companion. Tell Mise what you want to cook and when — we'll
-              build the timing plan.
+              Your warm cooking companion. Tell Mise what you want to cook and when — we'll build
+              the timing plan.
             </Text>
             <Text
               className="text-[#9E9488] text-[11px] mt-3"

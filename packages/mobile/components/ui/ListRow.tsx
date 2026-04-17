@@ -16,10 +16,7 @@ export function ListRow({ icon, title, value, onPress, destructive, rightElement
     <View className="flex-row items-center gap-3 bg-card border border-[#E4DBC9] rounded-xl px-4 py-4">
       {icon && <View>{icon}</View>}
       <View className="flex-1">
-        <Text
-          className={`${titleColor} text-[15px]`}
-          style={{ fontFamily: "Geist_500Medium" }}
-        >
+        <Text className={`${titleColor} text-[15px]`} style={{ fontFamily: "Geist_500Medium" }}>
           {title}
         </Text>
       </View>
