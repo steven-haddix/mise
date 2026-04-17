@@ -25,10 +25,10 @@ import {
 import { HappeningNowCard } from "../../../components/HappeningNowCard";
 import { ChatComposer } from "../../../components/ChatComposer";
 import {
-  QuickStartChips,
-  DEFAULT_QUICK_START_CHIPS,
-  type QuickStartChip,
-} from "../../../components/QuickStartChips";
+  QuickStartCards,
+  DEFAULT_QUICK_START_CARDS,
+  type QuickStartCardItem,
+} from "../../../components/QuickStartCards";
 import {
   getGreeting,
   formatClock,
@@ -153,8 +153,8 @@ export default function HomeScreen() {
     [sending],
   );
 
-  const handleChipSelect = (chip: QuickStartChip) => {
-    startConversationFromPrompt(chip.prompt);
+  const handleQuickStart = (item: QuickStartCardItem) => {
+    startConversationFromPrompt(item.prompt);
   };
 
   const handleSend = () => startConversationFromPrompt(input);
@@ -218,9 +218,9 @@ export default function HomeScreen() {
             </View>
           ) : null}
 
-          <View className="px-6 mt-10">
-            <Eyebrow color="ink-tertiary">START A PREP</Eyebrow>
-            <View className="mt-3">
+          <View className="px-6 mt-12">
+            <SectionHead title="Start a prep" italic />
+            <View className="mt-4">
               <ChatComposer
                 value={input}
                 onChangeText={setInput}
@@ -229,10 +229,12 @@ export default function HomeScreen() {
                 placeholder="What are you cooking?"
               />
             </View>
-          </View>
-
-          <View className="mt-4">
-            <QuickStartChips chips={DEFAULT_QUICK_START_CHIPS} onSelect={handleChipSelect} />
+            <View className="mt-5">
+              <QuickStartCards
+                items={DEFAULT_QUICK_START_CARDS}
+                onSelect={handleQuickStart}
+              />
+            </View>
           </View>
 
           {activeCount > 0 && (
