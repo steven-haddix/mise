@@ -37,7 +37,7 @@ export function validatePlan(input: ProposePlanInput, now: Date = new Date()): V
     return { ok: notes.length === 0, notes };
   }
 
-  const parsedSteps: { scheduledAt: Date; step: typeof input.steps[number] }[] = [];
+  const parsedSteps: { scheduledAt: Date; step: (typeof input.steps)[number] }[] = [];
 
   for (let i = 0; i < input.steps.length; i++) {
     const step = input.steps[i];

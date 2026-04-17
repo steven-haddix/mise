@@ -35,10 +35,4 @@ export interface HealthResponse {
 }
 
 // Re-export domain types for convenience
-export type {
-  Cook,
-  CookStep,
-  CookWithSteps,
-  Conversation,
-  Message,
-};
+export type { Cook, CookStep, CookWithSteps, Conversation, Message };

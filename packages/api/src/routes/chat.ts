@@ -25,10 +25,7 @@ chatRoutes.post("/chat", async (c) => {
 
   // Create new conversation if none provided
   if (!conversationId) {
-    const [convo] = await db
-      .insert(conversations)
-      .values({ userId: user.id })
-      .returning();
+    const [convo] = await db.insert(conversations).values({ userId: user.id }).returning();
     conversationId = convo.id;
   }
 

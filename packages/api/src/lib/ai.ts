@@ -32,76 +32,71 @@ How you operate:
 CRITICAL: NEVER use hardcoded timing rules. Every timing calculation must come from your own reasoning about the specific recipe, conditions, and constraints the user describes. Each cook is unique.`;
 
 const proposePlanSchema = z.object({
-	title: z.string().describe("Short name for the cook, e.g. 'Sourdough Bread'"),
-	targetTime: z
-		.iso
-		.datetime({ offset: true })
-		.describe(
-			"Single ISO 8601 timestamp for when the user wants to eat/serve (e.g. '2026-04-17T19:00:00Z').",
-		),
-	steps: z
-		.array(
-			z.object({
-				title: z.string().describe("Short step name, e.g. 'Feed your starter'"),
-				description: z.string().describe("Detailed instructions for this step"),
-				scheduledAt: z
-					.iso
-					.datetime({ offset: true })
-					.describe(
-						"Single ISO 8601 timestamp for when this step STARTS. Must be one instant — no ranges, no end times, no comma-separated values. A step's duration is implicit via the next step's scheduledAt.",
-					),
-			}),
-		)
-		.describe(
-			"All steps in chronological order, each with an absolute scheduled start time.",
-		),
+  title: z.string().describe("Short name for the cook, e.g. 'Sourdough Bread'"),
+  targetTime: z.iso
+    .datetime({ offset: true })
+    .describe(
+      "Single ISO 8601 timestamp for when the user wants to eat/serve (e.g. '2026-04-17T19:00:00Z').",
+    ),
+  steps: z
+    .array(
+      z.object({
+        title: z.string().describe("Short step name, e.g. 'Feed your starter'"),
+        description: z.string().describe("Detailed instructions for this step"),
+        scheduledAt: z.iso
+          .datetime({ offset: true })
+          .describe(
+            "Single ISO 8601 timestamp for when this step STARTS. Must be one instant — no ranges, no end times, no comma-separated values. A step's duration is implicit via the next step's scheduledAt.",
+          ),
+      }),
+    )
+    .describe("All steps in chronological order, each with an absolute scheduled start time."),
 });
 
 type ProposePlanInput = z.infer<typeof proposePlanSchema>;
 
 export function createAITools() {
-	return {
-		propose_plan: tool({
-			description:
-				"Propose a complete cooking timeline to the user as a preview card. This does NOT save anything — the user must confirm by tapping 'Build it' in the UI. Always call this when the user wants to cook something specific.",
-			inputSchema: proposePlanSchema,
-			execute: async ({ title, targetTime, steps }: ProposePlanInput) => {
-				const validation = validatePlan({ title, targetTime, steps });
-				if (!validation.ok) {
-					return {
-						error: "invalid_plan" as const,
-						notes: validation.notes,
-					};
-				}
+  return {
+    propose_plan: tool({
+      description:
+        "Propose a complete cooking timeline to the user as a preview card. This does NOT save anything — the user must confirm by tapping 'Build it' in the UI. Always call this when the user wants to cook something specific.",
+      inputSchema: proposePlanSchema,
+      execute: async ({ title, targetTime, steps }: ProposePlanInput) => {
+        const validation = validatePlan({ title, targetTime, steps });
+        if (!validation.ok) {
+          return {
+            error: "invalid_plan" as const,
+            notes: validation.notes,
+          };
+        }
 
-				const proposalId = randomUUID();
-				const stepsWithDurations = steps.map((step, i) => {
-					const prev = i === 0 ? null : steps[i - 1];
-					const durationFromPrev =
-						prev === null
-							? 0
-							: Math.max(
-									0,
-									Math.floor(
-										(new Date(step.scheduledAt).getTime() -
-											new Date(prev.scheduledAt).getTime()) /
-											1000,
-									),
-								);
-					return { ...step, durationFromPrev };
-				});
+        const proposalId = randomUUID();
+        const stepsWithDurations = steps.map((step, i) => {
+          const prev = i === 0 ? null : steps[i - 1];
+          const durationFromPrev =
+            prev === null
+              ? 0
+              : Math.max(
+                  0,
+                  Math.floor(
+                    (new Date(step.scheduledAt).getTime() - new Date(prev.scheduledAt).getTime()) /
+                      1000,
+                  ),
+                );
+          return { ...step, durationFromPrev };
+        });
 
-				return {
-					proposalId,
-					title,
-					targetTime,
-					steps: stepsWithDurations,
-					state: "active" as const,
-					createdCookId: null as string | null,
-				};
-			},
-		}),
-	};
+        return {
+          proposalId,
+          title,
+          targetTime,
+          steps: stepsWithDurations,
+          state: "active" as const,
+          createdCookId: null as string | null,
+        };
+      },
+    }),
+  };
 }
 
 export { SYSTEM_PROMPT };
