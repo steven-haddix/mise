@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 import "../global.css";
 import { Stack, Redirect } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -34,6 +34,8 @@ export default function RootLayout() {
   });
 
   if (!fontsLoaded) {
+    // Render a provider-free splash — heroui-native's Spinner depends on
+    // HeroUINativeProvider (Reanimated context), which isn't mounted yet.
     return (
       <View
         style={{
@@ -43,7 +45,7 @@ export default function RootLayout() {
           justifyContent: "center",
         }}
       >
-        <Spinner color={tokens.accent} />
+        <ActivityIndicator color={tokens.accent} />
       </View>
     );
   }
