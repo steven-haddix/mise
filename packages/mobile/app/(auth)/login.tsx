@@ -1,7 +1,7 @@
 import { View, Text } from "react-native";
 import { Button } from "heroui-native";
 import { authClient } from "../../lib/auth";
-import { Screen } from "../../components/ui";
+import { Screen, Eyebrow, Display } from "../../components/ui";
 
 export default function LoginScreen() {
   const handleGoogleLogin = async () => {
@@ -10,15 +10,40 @@ export default function LoginScreen() {
 
   return (
     <Screen>
-      <View className="flex-1 items-center justify-center px-8">
-        <Text className="text-primary text-5xl font-bold mb-2">Mise</Text>
-        <Text className="text-muted-foreground text-base text-center mb-12">
-          Your AI kitchen chemist.{"\n"}Every cook, perfectly timed.
-        </Text>
+      <View className="flex-1 px-8">
+        <View className="pt-14 pl-2">
+          <Text
+            className="text-foreground text-[40px]"
+            style={{ fontFamily: "Newsreader_600SemiBold" }}
+          >
+            mise.
+          </Text>
+        </View>
 
-        <Button variant="secondary" onPress={handleGoogleLogin} className="w-full">
-          <Button.Label>Continue with Google</Button.Label>
-        </Button>
+        <View className="flex-1 items-center justify-center">
+          <Eyebrow>WELCOME</Eyebrow>
+          <Display size="md" italic className="mt-2 text-center">
+            Good to meet you.
+          </Display>
+          <Text
+            className="text-[#6B635A] text-[14px] text-center mt-4 max-w-[280px]"
+            style={{ fontFamily: "Geist_400Regular" }}
+          >
+            Your AI kitchen chemist. Every cook, perfectly timed.
+          </Text>
+        </View>
+
+        <View className="pb-12">
+          <Button
+            variant="primary"
+            onPress={handleGoogleLogin}
+            className="w-full rounded-xl h-12 bg-primary"
+          >
+            <Button.Label className="text-[#F4EDE1] font-semibold">
+              Continue with Google
+            </Button.Label>
+          </Button>
+        </View>
       </View>
     </Screen>
   );
