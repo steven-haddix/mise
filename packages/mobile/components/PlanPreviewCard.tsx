@@ -2,7 +2,12 @@ import { useState, useMemo } from "react";
 import { View, Text, Pressable, Linking } from "react-native";
 import { ChevronDown, Clock, Timer, Bell, AlertTriangle } from "lucide-react-native";
 import { Card, Chip, Button, Spinner } from "heroui-native";
-import { formatClock, formatStepTimestamps, formatTotalDuration } from "../lib/time-format";
+import {
+  formatClock,
+  formatStepTimestamps,
+  formatTotalDuration,
+  splitClock,
+} from "../lib/time-format";
 import type { PermissionState } from "../lib/push-permissions";
 import { Display, Eyebrow, Timeline, type TimelineItem, tokens } from "./ui";
 
@@ -49,11 +54,11 @@ export function PlanPreviewCard({ data, pushPermission, onBuild, onViewCook, bui
     const stamps = formatStepTimestamps(data.steps.map((s) => parseDate(s.scheduledAt)));
     return data.steps.map((step, i) => {
       const stamp = stamps[i];
-      const timeParts = stamp?.time.split(" ") ?? [step.scheduledAt, ""];
+      const { time, meridiem } = splitClock(stamp?.time ?? step.scheduledAt);
       return {
         id: String(i),
-        time: timeParts[0] || "",
-        meridiem: timeParts[1],
+        time,
+        meridiem,
         title: step.title,
         description: step.description || undefined,
         dayLabel: stamp?.dayLabel ?? null,

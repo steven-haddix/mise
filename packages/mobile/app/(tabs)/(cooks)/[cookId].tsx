@@ -15,7 +15,12 @@ import {
   Display,
   tokens,
 } from "../../../components/ui";
-import { computeDayOfCook, formatClock, formatStepTimestamps } from "../../../lib/time-format";
+import {
+  computeDayOfCook,
+  formatClock,
+  formatStepTimestamps,
+  splitClock,
+} from "../../../lib/time-format";
 import type { CookWithSteps, CookStep } from "@mise/shared";
 
 function mapStatus(step: CookStep, now: Date): StepStatus {
@@ -73,7 +78,7 @@ export default function CookTimelineScreen() {
     return cook.steps.map((step, i) => {
       const stamp = stamps[i];
       const status = mapStatus(step, now);
-      const [time, meridiem] = (stamp?.time ?? formatClock(dates[i])).split(" ");
+      const { time, meridiem } = splitClock(stamp?.time ?? formatClock(dates[i]));
       return {
         id: step.id,
         time,

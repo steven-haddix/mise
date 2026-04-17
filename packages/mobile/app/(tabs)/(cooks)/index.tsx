@@ -29,7 +29,7 @@ import {
   DEFAULT_QUICK_START_CHIPS,
   type QuickStartChip,
 } from "../../../components/QuickStartChips";
-import { getGreeting, formatClock } from "../../../lib/time-format";
+import { getGreeting, formatClock, splitClock } from "../../../lib/time-format";
 import type { CookWithSteps, CookStep } from "@mise/shared";
 
 function todayEyebrow(now: Date, activeMultiDay?: { x: number; y: number } | null): string {
@@ -60,7 +60,7 @@ function buildSchedule(cooks: CookWithSteps[], limit: number): ScheduleEntry[] {
   const top = flat.slice(0, limit);
 
   return top.map(({ cook, step, scheduledAt }, i) => {
-    const [time, meridiem] = formatClock(scheduledAt).split(" ");
+    const { time, meridiem } = splitClock(formatClock(scheduledAt));
     const status: StepStatus = i === 0 ? "next" : "upcoming";
     return {
       id: step.id,

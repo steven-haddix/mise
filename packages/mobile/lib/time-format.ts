@@ -146,6 +146,19 @@ function weekdayShort(d: Date): string {
 }
 
 /**
+ * Splits a localized clock string like "2:00 PM" into time + meridiem.
+ * Handles the narrow non-breaking space (U+202F) and NBSP (U+00A0) that
+ * modern ICU inserts before AM/PM in many locales — a plain `.split(" ")`
+ * misses those and leaves "2:00\u202FPM" whole, which blows out narrow
+ * columns. 24-hour locales return `{ time, meridiem: undefined }`.
+ */
+export function splitClock(full: string): { time: string; meridiem?: string } {
+  const parts = full.split(/[\s\u00A0\u202F]+/).filter(Boolean);
+  if (parts.length >= 2) return { time: parts[0], meridiem: parts[1] };
+  return { time: full };
+}
+
+/**
  * Formats a seconds duration for the live countdown on HappeningNowCard.
  * `mm:ss` below an hour, `HH:MM:SS` at or above an hour. Negative clamps to 00:00.
  */
