@@ -6,14 +6,59 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ScopedTheme } from "uniwind";
 import { HeroUINativeProvider } from "heroui-native/provider";
 import { Spinner } from "heroui-native";
+import {
+  useFonts as useNewsreader,
+  Newsreader_400Regular,
+  Newsreader_500Medium,
+  Newsreader_600SemiBold,
+  Newsreader_400Regular_Italic,
+  Newsreader_600SemiBold_Italic,
+} from "@expo-google-fonts/newsreader";
+import {
+  Geist_400Regular,
+  Geist_500Medium,
+  Geist_700Bold,
+} from "@expo-google-fonts/geist";
+import {
+  IBMPlexMono_400Regular,
+  IBMPlexMono_500Medium,
+} from "@expo-google-fonts/ibm-plex-mono";
 import { authClient } from "../lib/auth";
 import { tokens } from "../components/ui/tokens";
 
 export default function RootLayout() {
+  const [fontsLoaded] = useNewsreader({
+    Newsreader_400Regular,
+    Newsreader_500Medium,
+    Newsreader_600SemiBold,
+    Newsreader_400Regular_Italic,
+    Newsreader_600SemiBold_Italic,
+    Geist_400Regular,
+    Geist_500Medium,
+    Geist_700Bold,
+    IBMPlexMono_400Regular,
+    IBMPlexMono_500Medium,
+  });
+
+  if (!fontsLoaded) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: tokens.background,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Spinner color={tokens.accent} />
+      </View>
+    );
+  }
+
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: tokens.background }}>
       <SafeAreaProvider>
-        <ScopedTheme theme="dark">
+        <ScopedTheme theme="light">
           <HeroUINativeProvider>
             <SessionGate />
           </HeroUINativeProvider>
@@ -29,7 +74,7 @@ function SessionGate() {
   if (isPending) {
     return (
       <View className="flex-1 bg-background items-center justify-center">
-        <Spinner color={tokens.primary} />
+        <Spinner color={tokens.accent} />
       </View>
     );
   }
