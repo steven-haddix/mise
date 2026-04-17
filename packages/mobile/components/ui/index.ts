@@ -6,4 +6,7 @@ export { Display } from "./Display";
 export { SectionHead } from "./SectionHead";
 export { InkCard } from "./InkCard";
 export { CookMeta } from "./CookMeta";
+export { StepRow, type StepStatus } from "./StepRow";
+export { Schedule, type ScheduleItem } from "./Schedule";
+export { Timeline, type TimelineItem } from "./Timeline";
 export { tokens } from "./tokens";
